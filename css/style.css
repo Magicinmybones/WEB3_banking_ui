@@ -174,7 +174,9 @@ button { font: inherit; color: inherit; }
   transform-origin: center;
 }
 
-@media (min-width: 901px) {
+/* Snapping belongs to the scaled artboard; see section 8 for where 1200px
+   comes from. */
+@media (min-width: 1200px) {
   html { scroll-snap-type: y mandatory; }
 }
 
@@ -237,6 +239,14 @@ button { font: inherit; color: inherit; }
   line-height: 14px;
   letter-spacing: -0.02em;
 }
+
+/* The nav and the white button are wrapped so the tablet burger has one
+   surface to open. The wrapper is boxless everywhere else, so both frames
+   keep placing those two elements from their own coordinates. */
+.navmenu { display: contents; }
+
+/* the burger only exists in the tablet band, where it replaces the row above */
+.navburger { display: none; }
 
 /* ==========================================================================
    6. SECTION 1 - hero
@@ -774,12 +784,34 @@ button { font: inherit; color: inherit; }
 .lcard--staking .lcard__desc { left: 106px; top: 733.05px; }
 
 /* ==========================================================================
-   8. Small viewports
-   The Figma file only contains desktop frames, so the layout is not
-   redesigned - it reflows into a single column at the same type scale,
-   keeping every element, colour, radius and asset from the design.
+   8. Below the artboard breakpoint - shared reflow foundation
+
+   Where the breakpoint comes from
+   -------------------------------
+   The desktop section is one uniformly scaled artboard, so it never collides
+   or overflows as the viewport narrows: it simply renders smaller. Its failure
+   mode is therefore legibility, and the switch is placed at the width where
+   the type actually stops holding up. Measured on the rendered page:
+
+     viewport     scale   lede   card copy   pill   tag / eyebrow
+     1440 x 900   0.839   18.5     15.1      13.4       11.7
+     1280 x 800   0.746   16.4     13.4      11.9       10.4
+     1200 x 800   0.712   15.7     12.8      11.4       10.0   <- last good
+     1180 x 820   0.700   15.4     12.6      11.2        9.8
+     1024 x 768   0.608   13.4     11.0       9.7        8.5   <- broken
+
+   1200px is the last width where the body copy is still in the 13px range and
+   the labels hold 10px, so the artboard keeps its own architecture down to
+   there - well past the conventional 1024px tablet breakpoint - and hands over
+   only when it would start shrinking the design instead of laying it out.
+   The height axis is deliberately left out of the trigger so that no existing
+   desktop window changes architecture.
+
+   This block is the foundation shared by every viewport under that width: the
+   artboard stops scaling and the two frames reflow into flow layout at their
+   native type sizes. Section 9 then builds the tablet architecture on top.
    ========================================================================== */
-@media (max-width: 900px) {
+@media (max-width: 1199.98px) {
   .viewport { display: block; height: auto !important; overflow: visible; }
 
   .stage {
@@ -959,6 +991,337 @@ button { font: inherit; color: inherit; }
   .hero__scene,
   .lifestyle__scene {
     display: contents;
+  }
+}
+
+/* ==========================================================================
+   9. Tablet architecture (600px - 1199.98px)
+
+   The artboard is no longer scaled here, so the frames are re-composed at
+   their native type sizes instead of being shrunk. Nothing is removed and no
+   component is redesigned: the same panes, cards, tags, rings and artwork are
+   re-distributed over the space a tablet actually offers.
+
+     - the two hero panes stay side by side while the viewport is at least as
+       wide as it is tall, then the showcase moves below the copy;
+     - the copy that floats over the left pane on desktop keeps that pane as
+       its surface, sharing one grid cell with it;
+     - the showcase becomes a four-row grid, so its eyebrow, card, copy and
+       dots can never collide the way fixed percentages did;
+     - the three feature cards pair up two-across while a column can carry
+       them at a readable scale (>= 940px), then fall to one column at their
+       native size;
+     - the nav row folds into a burger that opens the very same links and
+       button on a surface built from the section 2 card treatment.
+   ========================================================================== */
+@media (min-width: 600px) and (max-width: 1199.98px) {
+  :root {
+    /* outer margin and rhythm: tighter than desktop, still unmistakably the
+       same generous spacing language */
+    --pad: clamp(24px, 3.2vw, 40px);
+    --tgap: clamp(18px, 2.4vw, 30px);
+  }
+
+  .panel {
+    display: flex;
+    flex-direction: column;
+    padding: var(--pad) var(--pad) calc(var(--pad) + 6px);
+    border-radius: clamp(26px, 2.6vw, 33px);
+  }
+
+  /* --- chrome: the nav row folds into the burger ------------------------ */
+  .topbar {
+    order: -1;
+    z-index: 10;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: clamp(26px, 4vw, 44px);
+  }
+
+  .navburger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--r-pill);
+    background: transparent;
+    cursor: pointer;
+    transition: background-color 0.18s ease;
+  }
+  .navburger:hover,
+  .navburger[aria-expanded='true'] { background: rgba(255, 255, 255, 0.1); }
+
+  /* three hairlines in the panel's own stroke weight; they cross into a
+     close icon while the menu is open */
+  .navburger__bars,
+  .navburger__bars::before,
+  .navburger__bars::after {
+    display: block;
+    width: 18px;
+    height: 1.5px;
+    border-radius: 1px;
+    background: var(--white);
+    transition: transform 0.22s ease, background-color 0.16s ease;
+  }
+  .navburger__bars { position: relative; }
+  .navburger__bars::before,
+  .navburger__bars::after { content: ''; position: absolute; left: 0; }
+  .navburger__bars::before { top: -5.5px; }
+  .navburger__bars::after { top: 5.5px; }
+
+  .navburger[aria-expanded='true'] .navburger__bars { background: transparent; }
+  .navburger[aria-expanded='true'] .navburger__bars::before {
+    transform: translateY(5.5px) rotate(45deg);
+  }
+  .navburger[aria-expanded='true'] .navburger__bars::after {
+    transform: translateY(-5.5px) rotate(-45deg);
+  }
+
+  /* The menu surface reuses the section 2 card gradient, the 10% hairline,
+     the 26px pane radius and the staking badge's shadow and blur - the same
+     glass language the rest of the page is built from. */
+  .navmenu {
+    display: block;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 14px);
+    z-index: 30;
+    width: min(300px, 100%);
+    padding: 14px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-pane);
+    background: var(--surface-card);
+    box-shadow: 0 32px 43px -13px rgba(0, 0, 0, 0.48);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-8px) scale(0.98);
+    transform-origin: 100% 0;
+    /* visibility is held until the fade-out has finished, so the closed menu
+       leaves the tab order the moment it stops being usable */
+    transition: opacity 0.22s ease, transform 0.22s ease, visibility 0s linear 0.22s;
+  }
+  /* On the way in visibility is released immediately, so the first item can
+     take focus on the same frame the menu opens. The blur is carried by the
+     open state alone: a closed surface has no backdrop worth sampling and
+     some engines still composite one. */
+  .navmenu.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none;
+    -webkit-backdrop-filter: blur(27.3px);
+    backdrop-filter: blur(27.3px);
+    transition: opacity 0.22s ease, transform 0.22s ease, visibility 0s;
+  }
+
+  /* the pills and the button are the desktop components, only stacked */
+  .navmenu .navlinks {
+    position: static;
+    flex: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    height: auto;
+    transform: none;
+  }
+  .navmenu .pill {
+    justify-content: flex-start;
+    height: 46px;
+    padding: 0 16px;
+    font-size: 16px;
+  }
+  .navmenu .btn-white {
+    position: static;
+    width: 100%;
+    height: 46px;
+    margin-top: 10px;
+    padding: 0 16px;
+    font-size: 16px;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* --- section 1: hero ---------------------------------------------- */
+  /* ------------------------------------------------------------------ */
+  /* the scene stops being the pinned transition layer and becomes the
+     section's own layout box */
+  .hero__scene {
+    position: relative;
+    inset: auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--tgap);
+  }
+
+  /* the left pane returns as the surface the hero copy sits on, the two
+     sharing one cell exactly as they overlap on desktop */
+  .hero__pane--left {
+    display: block;
+    position: relative;
+    grid-area: 1 / 1;
+    left: auto;
+    top: auto;
+    width: auto;
+    height: auto;
+    border-radius: var(--r-pane);
+  }
+
+  .hero__content {
+    grid-area: 1 / 1;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(28px, 4.2vw, 56px);
+  }
+
+  .hero__title {
+    font-size: clamp(48px, 11vw, 96px);
+    margin-bottom: clamp(18px, 2.4vw, 28px);
+  }
+  .hero__lede {
+    font-size: clamp(17px, 2.1vw, 22px);
+    line-height: 1.32;
+    margin-bottom: clamp(26px, 3.4vw, 40px);
+  }
+  /* the CTA keeps its exact Figma dimensions - it is already a comfortable
+     touch target and shrinking it would only cost usability */
+  .cta { align-self: flex-start; }
+
+  /* --- showcase: four rows instead of fixed percentages --------------- */
+  .hero__pane--right {
+    grid-area: 2 / 1;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    justify-items: center;
+    /* stacked under the copy the pane keeps a shape close to the frame's own,
+       so the card, the copy and the dots stay comfortably sized instead of
+       being squeezed into a short strip */
+    height: auto;
+    min-height: 380px;
+    aspect-ratio: 5 / 4;
+    max-height: min(56dvh, 620px);
+    padding: clamp(20px, 3.4%, 34px);
+    row-gap: clamp(14px, 2.4%, 24px);
+  }
+
+  .showcase__eyebrow {
+    position: relative;
+    left: auto;
+    top: auto;
+    justify-self: start;
+    font-size: 14px;
+  }
+
+  /* sized from the row it is given rather than from the pane's width, so it
+     keeps its proportions whichever way the pane ends up shaped */
+  .showcase__card {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: auto;
+    height: auto;
+    min-height: 0;
+    /* the row it is given is the only limit; the card scales down to fit it
+       and never past its own 301x423 render, so it stays sharp */
+    max-width: 100%;
+    max-height: 100%;
+    align-self: center;
+    transform: none;
+    border-radius: 12.3% / 8.75%;
+  }
+
+  .showcase__copy {
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    width: 100%;
+    text-align: center;
+  }
+  .showcase__title { font-size: clamp(30px, 3.6vw, 40px); }
+  .showcase__sub { font-size: clamp(15px, 1.8vw, 18px); }
+
+  .dots {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    gap: 14px;
+    transform: none;
+  }
+  /* the dot keeps its 6px design size; only its hit area grows for touch */
+  .dot { position: relative; }
+  .dot::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 20px;
+    height: 32px;
+    transform: translate(-50%, -50%);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* --- section 2: your digital lifestyle ----------------------------- */
+  /* ------------------------------------------------------------------ */
+  .lifestyle__title {
+    font-size: clamp(48px, 7.6vw, 96px);
+    margin-bottom: clamp(30px, 4.4vw, 56px);
+  }
+
+  .lifestyle__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    align-items: start;
+    gap: var(--tgap);
+  }
+}
+
+/* Hero: the two panes are a landscape composition - side by side they need a
+   viewport at least as wide as it is tall, whatever that width happens to be.
+   Keying the switch to the shape rather than to a pixel width keeps every
+   landscape tablet on the frame's own two-pane split and gives portrait ones
+   the stacked composition, with no jump at some arbitrary device width. */
+@media (min-width: 600px) and (max-width: 1199.98px) and (min-aspect-ratio: 1 / 1) {
+  .hero__scene {
+    /* 176px is the chrome this section puts around the scene at these widths
+       (panel padding, the nav row and its margin), so the hero lands inside
+       the viewport instead of just past it. Both columns are given the height
+       explicitly: it keeps the showcase's card row definite, so the card is
+       sized by the room it is given rather than by the asset's own height. */
+    --hero-h: clamp(430px, calc(100dvh - 176px), 720px);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+    min-height: var(--hero-h);
+  }
+
+  .hero__pane--right {
+    grid-area: 1 / 2;
+    height: var(--hero-h);
+    min-height: 0;
+    max-height: none;
+    aspect-ratio: auto;
+  }
+
+  .hero__title { font-size: clamp(40px, 7.6vw, 92px); }
+}
+
+/* Section 2: two columns for as long as a column can carry a card at a
+   readable scale. Below 940px a card would drop under ~0.78 of its design
+   size - the point where its 18px description falls under 14px - so the grid
+   goes to one column and the cards run at their native size instead. */
+@media (min-width: 940px) and (max-width: 1199.98px) {
+  .lifestyle__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  /* the two tall cards pair on the first row and the short one centres below,
+     held to one column's width so all three keep the same scale */
+  .lcard-slot:last-child {
+    grid-column: 1 / -1;
+    width: calc((100% - var(--tgap)) / 2);
   }
 }
 
