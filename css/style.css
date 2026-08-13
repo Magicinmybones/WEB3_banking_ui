@@ -1,0 +1,931 @@
+/* ==========================================================================
+   Seamless Web3 Banking
+   Implementation of the supplied Figma frames
+   "Dribbble shot HD - 128" (hero) and "Dribbble shot HD - 129" (features).
+
+   Every measurement below is taken from the Figma document. The design is a
+   fixed 1685 x 1073 canvas per section, so the desktop build reproduces those
+   coordinates literally and is scaled proportionally to the viewport.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Fonts
+   The document uses TT Hoves Medium (display) and Suisse Intl Regular (body).
+   Both are commercial licences that cannot be redistributed here, so the two
+   metrically closest freely available faces are self-hosted instead:
+     TT Hoves Medium     -> Figtree 500          (~1.6% mean advance delta)
+     Suisse Intl Regular -> Instrument Sans 400  (~1.4% mean advance delta)
+   All line breaks are hard-coded so wrapping matches the Figma frames exactly.
+   -------------------------------------------------------------------------- */
+@font-face {
+  font-family: 'Figtree';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/figtree-500.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Figtree';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/figtree-500-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Instrument Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/instrument-sans-400.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Instrument Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/instrument-sans-400-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* --------------------------------------------------------------------------
+   2. Design tokens
+   -------------------------------------------------------------------------- */
+:root {
+  --design-width: 1685px;
+  --design-height: 1073px;
+
+  --font-display: 'Figtree', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: 'Instrument Sans', 'Helvetica Neue', Arial, sans-serif;
+
+  /* colours, straight from the Figma paints */
+  --panel-bg: #020202;
+  --pane-base: #262626;
+  --pane-top: #313131;
+  --pane-bottom: #111212;
+  --card-top: #1a1b1b;
+  --card-bottom: #111212;
+  --white: #ffffff;
+  --ink: #000000;
+
+  --hairline: rgba(255, 255, 255, 0.1);
+  --tag-fill: rgba(255, 255, 255, 0.05);
+  --glass-fill: rgba(0, 0, 0, 0.1);
+  --glass-line: rgba(255, 255, 255, 0.14);
+
+  /* radii */
+  --r-panel: 33px;
+  --r-pane: 26px;
+  --r-visa: 37px;
+  --r-cta: 14px;
+  --r-pill: 10px;
+  --r-keyplate: 40px;
+  --r-keyplate-inner: 30px;
+  --r-tag: 29px;
+
+  /* the two card surface gradients repeat across the feature cards */
+  --surface-card: linear-gradient(0deg, var(--card-bottom) 0%, var(--card-top) 100%);
+}
+
+/* --------------------------------------------------------------------------
+   3. Base
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--panel-bg);
+  color: var(--white);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, p { margin: 0; }
+
+img { display: block; max-width: 100%; }
+
+a { color: inherit; text-decoration: none; }
+
+button { font: inherit; color: inherit; }
+
+.svg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.75);
+  outline-offset: 3px;
+}
+
+/* --------------------------------------------------------------------------
+   4. Scaling stage
+   The artboard is a fixed 1685px canvas. Above that width it renders 1:1;
+   below it, the whole stage is scaled so proportions stay identical to Figma.
+   `--scale` and the wrapper height are maintained in js/script.js.
+   -------------------------------------------------------------------------- */
+.viewport {
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.stage {
+  width: var(--design-width);
+  flex: 0 0 auto;
+  transform: scale(var(--scale, 1));
+  transform-origin: top center;
+}
+
+/* --------------------------------------------------------------------------
+   5. Panels
+   -------------------------------------------------------------------------- */
+.panel {
+  position: relative;
+  width: var(--design-width);
+  height: var(--design-height);
+  border-radius: var(--r-panel);
+  background: var(--panel-bg);
+}
+
+/* --------------------------------------------------------------------------
+   6. Shared components
+   -------------------------------------------------------------------------- */
+
+/* --- top bar (its three items are placed at their Figma coordinates) ------ */
+.logo {
+  position: absolute;
+  left: 39px;
+  top: 37px;
+  width: 46.92px;
+  height: 46px;
+}
+.logo img { width: 100%; height: 100%; }
+
+.navlinks {
+  position: absolute;
+  left: 96.76px;
+  top: 37px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 46px;
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 46px;
+  padding: 16px;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--white);
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 14px;
+  letter-spacing: -0.02em;
+  transition: background-color 0.18s ease;
+}
+.pill:hover,
+.pill.is-active { background: rgba(255, 255, 255, 0.1); }
+
+/* --- white buttons ------------------------------------------------------- */
+.btn-white {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--white);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.btn-white--sm {
+  position: absolute;
+  left: 1494px;
+  top: 37px;
+  width: 151px;
+  height: 46px;
+  padding: 16px;
+  border-radius: var(--r-pill);
+  font-size: 16px;
+  line-height: 14px;
+}
+
+/* --- tags / badges ------------------------------------------------------- */
+.tag {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-tag);
+  background: var(--tag-fill);
+  /* the 80% opacity sits on the label in Figma, not on the container */
+  color: rgba(255, 255, 255, 0.8);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 18px;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+/* --- decorative stroke-only ellipses ------------------------------------- */
+.ring {
+  position: absolute;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* --- feature card copy --------------------------------------------------- */
+.fcard__title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 32px;
+  line-height: 29px;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.fcard__desc {
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 23px;
+  letter-spacing: -0.02em;
+  text-align: center;
+  opacity: 0.8;
+}
+
+/* ==========================================================================
+   7. HERO PANEL  (Figma frame "Dribbble shot HD - 128")
+   ========================================================================== */
+.hero__pane {
+  position: absolute;
+  top: 10px;
+  width: 827px;
+  height: 1053px;
+  border-radius: var(--r-pane);
+}
+
+.hero__pane--left {
+  left: 10px;
+  background:
+    linear-gradient(0deg, var(--pane-bottom) 0%, var(--pane-top) 100%),
+    var(--pane-base);
+}
+
+.hero__pane--right {
+  left: 848px;
+  overflow: hidden;
+}
+
+/* --- showcase (right pane) ----------------------------------------------- */
+.showcase__bg,
+.showcase__peak {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.showcase__eyebrow {
+  position: absolute;
+  left: 34px;
+  top: 32.02px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 18px;
+  letter-spacing: -0.02em;
+  opacity: 0.4;
+}
+
+.showcase__card {
+  position: absolute;
+  left: 263px;
+  top: 269px;
+  width: 301px;
+  height: 423px;
+  border-radius: var(--r-visa);
+}
+
+.showcase__title {
+  position: absolute;
+  left: 259px;
+  top: 745px;
+  width: 286px;
+  height: 72px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 40px;
+  line-height: 36px;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.showcase__sub {
+  position: absolute;
+  left: 264px;
+  top: 836.05px;
+  width: 275.42px;
+  height: 46px;
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 23px;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.dots {
+  position: absolute;
+  left: 395px;
+  top: 998px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 6px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 22px;
+  background: #d9d9d9;
+  opacity: 0.2;
+  cursor: pointer;
+  transition: opacity 0.18s ease;
+}
+.dot.is-active { opacity: 1; }
+
+/* --- hero copy ----------------------------------------------------------- */
+/* The substituted display face carries a slightly taller ascent than
+   TT Hoves, so the two largest headings are nudged down by the difference
+   to land their first baseline exactly where Figma puts it. */
+.hero__title {
+  position: absolute;
+  left: 39px;
+  top: 279px;
+  transform: translateY(1.8px);
+  width: 578px;
+  height: 324px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 120px;
+  line-height: 108px;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+}
+
+.hero__lede {
+  position: absolute;
+  left: 39px;
+  top: 640.06px;
+  width: 357.49px;
+  height: 58px;
+  font-family: var(--font-body);
+  font-size: 22px;
+  line-height: 29px;
+  letter-spacing: -0.02em;
+}
+
+/* Two overlapping white frames in Figma (189x63 at x0 and 63x63 at x181)
+   that merge into one continuous shape - reproduced here as a single link. */
+.cta {
+  position: absolute;
+  left: 39px;
+  top: 964px;
+  display: flex;
+  width: 244px;
+  height: 63px;
+}
+
+.cta__label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 189px;
+  height: 63px;
+  padding: 10px 24px;
+  border-radius: var(--r-cta);
+  background: var(--white);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 19px;
+  line-height: 19px;
+  letter-spacing: -0.02em;
+}
+
+.cta__arrow {
+  position: absolute;
+  left: 181px;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 63px;
+  height: 63px;
+  border-radius: var(--r-cta);
+  background: var(--white);
+}
+
+.cta__arrow img {
+  width: 21.21px;
+  height: 21.21px;
+  transform: rotate(90deg);
+}
+
+/* ==========================================================================
+   8. FEATURES PANEL  (Figma frame "Dribbble shot HD - 129")
+   ========================================================================== */
+.topbar--centered .logo,
+.topbar--centered .navlinks,
+.topbar--centered .btn-white--sm { top: 23px; }
+
+.topbar--centered .navlinks { left: 700px; }
+
+.features__title {
+  position: absolute;
+  left: 549px;
+  top: 195px;
+  transform: translateY(1.54px);
+  width: 585px;
+  height: 172px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 96px;
+  line-height: 86px;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* The grid and slot wrappers only exist for the single-column fallback; on
+   desktop they generate no box so the cards keep their Figma coordinates. */
+.features__grid,
+.fcard-slot,
+.showcase__copy { display: contents; }
+
+.fcard { position: absolute; }
+
+.fcard__body {
+  position: absolute;
+  border-radius: var(--r-pane);
+  background: var(--surface-card);
+}
+
+.fcard__text { position: absolute; width: 327.2px; height: 126.05px; }
+
+.fcard__desc {
+  position: absolute;
+  left: 0;
+  top: 80.05px;
+  width: 327.19px;
+  height: 46px;
+}
+
+/* --- card 1: non-custodial security -------------------------------------- */
+.fcard--security {
+  left: 10px;
+  top: 221px;
+  width: 547px;
+  height: 843px;
+}
+
+.fcard--security .fcard__body {
+  left: 0;
+  top: 241px;
+  width: 547px;
+  height: 602px;
+  background:
+    radial-gradient(368px 368px at 273.5px -26px,
+      rgba(102, 102, 102, 0.5) 0%, rgba(102, 102, 102, 0) 100%),
+    var(--surface-card);
+}
+
+.ring--security { left: 34px; top: 0; width: 481px; height: 481px; }
+
+.tag--security { left: 210px; top: 304px; width: 127px; }
+
+/* 1px inside stroke -> transparent border painted by a border-box gradient */
+.keyplate {
+  position: absolute;
+  left: 180px;
+  top: 369px;
+  width: 189px;
+  height: 189px;
+  border: 1px solid transparent;
+  border-radius: var(--r-keyplate);
+  background-image:
+    conic-gradient(from 0deg at 50% 50%, #8b8b8c 133.14deg, #171818 313.95deg),
+    linear-gradient(180deg, #000000 0%, #666666 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+/* Figma places this at 16,17 - offset by the 1px border of .keyplate */
+.keyplate__inner {
+  position: absolute;
+  left: 15px;
+  top: 16px;
+  width: 156px;
+  height: 156px;
+  border: 9px solid transparent;
+  border-radius: var(--r-keyplate-inner);
+  background-image:
+    radial-gradient(253.7px 263.9px at 8.5px -7.5px,
+      rgba(237, 237, 237, 0.2) 24.15%, rgba(0, 0, 0, 0) 100%),
+    linear-gradient(rgba(0, 0, 0, 0.77), rgba(0, 0, 0, 0.77)),
+    linear-gradient(180deg, rgba(87, 87, 87, 0.9) -77.56%,
+      rgba(12, 12, 12, 0.9) 165.38%);
+  background-origin: border-box;
+  background-clip: padding-box, padding-box, border-box;
+  -webkit-backdrop-filter: blur(59.45px);
+  backdrop-filter: blur(59.45px);
+}
+
+.keyplate__icon {
+  position: absolute;
+  left: 237px;
+  top: 427px;
+  width: 73px;
+  height: 73px;
+  transform: rotate(90deg);
+  mix-blend-mode: soft-light;
+}
+
+.fcard--security .fcard__text { left: 106px; top: 652px; }
+.fcard--security .fcard__title {
+  position: absolute;
+  left: 11px;
+  top: 0;
+  width: 305px;
+  height: 58px;
+}
+
+/* --- card 2: lightning transfers ----------------------------------------- */
+.fcard--transfers {
+  left: 568px;
+  top: 461px;
+  width: 549px;
+  height: 602px;
+}
+
+.fcard--transfers .fcard__body {
+  left: 0;
+  top: 0;
+  width: 548px;
+  height: 602px;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.globe {
+  position: absolute;
+  left: 1px;
+  top: 98px;
+  width: 545px;
+  height: 411px;
+  object-fit: cover;
+  object-position: center;
+  mix-blend-mode: screen;
+}
+
+.globe-fade {
+  position: absolute;
+  left: 1px;
+  top: 98px;
+  width: 548px;
+  height: 413px;
+  background: linear-gradient(180deg,
+    rgba(25, 26, 26, 0) 11.26%, #121313 67.07%);
+}
+
+.ring--transfers { left: 25px; top: 81px; width: 481px; height: 481px; }
+
+.tag--wallet {
+  left: 44px;
+  top: 123px;
+  width: 90px;
+  -webkit-backdrop-filter: blur(17.95px);
+  backdrop-filter: blur(17.95px);
+}
+
+.tag--bank {
+  left: 366px;
+  top: 94px;
+  width: 114px;
+  -webkit-backdrop-filter: blur(17.95px);
+  backdrop-filter: blur(17.95px);
+}
+
+.node-dot {
+  position: absolute;
+  left: 184px;
+  top: 89px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--white);
+}
+
+.fcard--transfers .fcard__text { left: 106px; top: 413px; }
+.fcard--transfers .fcard__title {
+  position: absolute;
+  left: 68px;
+  top: 0;
+  width: 192px;
+  height: 58px;
+}
+
+/* --- card 3: automated staking ------------------------------------------- */
+.fcard--staking {
+  left: 1127px;
+  top: 220px;
+  width: 548px;
+  height: 843px;
+}
+
+.fcard--staking .fcard__body {
+  left: 0;
+  top: 241px;
+  width: 548px;
+  height: 602px;
+  background:
+    radial-gradient(357.1px 444.3px at 610.5px -78.5px,
+      rgba(102, 102, 102, 0.5) 0%, rgba(102, 102, 102, 0) 100%),
+    radial-gradient(278.5px 365.1px at 13.5px -16px,
+      rgba(102, 102, 102, 0.5) 0%, rgba(102, 102, 102, 0) 100%),
+    var(--surface-card);
+}
+
+/* Figma "noise" effect: monotone, 1px grain, colour #000 25%, opacity 15% */
+.fcard--staking .fcard__body::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-pane);
+  background-image: url('../assets/images/noise.png');
+  pointer-events: none;
+}
+
+.orbit {
+  position: absolute;
+  left: 22px;
+  top: 0;
+  width: 505px;
+  height: 645px;
+}
+
+.ring--outer { left: 0; top: 0; width: 505px; height: 505px; }
+.ring--inner { left: 111px; top: 118px; width: 265px; height: 265px; }
+
+.orbit__card {
+  position: absolute;
+  left: 76.3px;
+  top: 381px;
+  width: 346px;
+  height: 264px;
+}
+
+.orbit__badge {
+  position: absolute;
+  left: 198px;
+  top: 335px;
+  width: 103px;
+  height: 103px;
+  border: 1px solid var(--glass-line);
+  border-radius: 50%;
+  background: var(--glass-fill);
+  box-shadow: 0 32px 43px -13px rgba(0, 0, 0, 0.48);
+  -webkit-backdrop-filter: blur(27.3px);
+  backdrop-filter: blur(27.3px);
+}
+
+.orbit__badge-inner {
+  position: absolute;
+  left: 9px;
+  top: 9px;
+  width: 82px;
+  height: 82px;
+  border: 1px solid var(--glass-line);
+  border-radius: 50%;
+  background: var(--glass-fill);
+}
+
+.orbit__bolt {
+  position: absolute;
+  left: 34px;
+  top: 28px;
+  width: 38px;
+  height: 38.52px;
+}
+
+.tag--yield { left: 200px; top: 279px; width: 103px; }
+
+.fcard--staking .fcard__title {
+  position: absolute;
+  left: 127px;
+  top: 653px;
+  width: 286px;
+  height: 58px;
+}
+
+.fcard--staking .fcard__desc { left: 106px; top: 733.05px; }
+
+/* ==========================================================================
+   9. Small viewports
+   The Figma file only contains desktop frames, so the layout is not
+   redesigned - it reflows into a single column at the same type scale,
+   keeping every element, colour, radius and asset from the design.
+   ========================================================================== */
+@media (max-width: 900px) {
+  .viewport { display: block; height: auto !important; overflow: visible; }
+
+  .stage {
+    width: 100%;
+    transform: none;
+  }
+
+  .panel {
+    width: 100%;
+    height: auto;
+    border-radius: 24px;
+    padding: 20px 20px 32px;
+    overflow: hidden;
+  }
+
+  /* --- topbar --------------------------------------------------------- */
+  .topbar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+
+  .logo,
+  .navlinks,
+  .btn-white--sm,
+  .topbar--centered .logo,
+  .topbar--centered .navlinks,
+  .topbar--centered .btn-white--sm {
+    position: static;
+  }
+
+  .navlinks { flex: 1 1 auto; justify-content: center; gap: 4px; }
+  .pill { padding: 12px; font-size: 14px; }
+  .btn-white--sm { width: auto; padding: 14px 18px; font-size: 14px; }
+
+  /* --- hero ----------------------------------------------------------- */
+  .hero { display: flex; flex-direction: column; }
+  .hero__pane--left { display: none; }
+
+  .hero__content {
+    position: relative;
+    order: 2;
+    padding: 32px 4px 8px;
+  }
+
+  .hero__title,
+  .hero__lede,
+  .cta {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: auto;
+    height: auto;
+    transform: none;
+  }
+
+  .hero__title {
+    font-size: clamp(48px, 14vw, 96px);
+    line-height: 0.9;
+    margin-bottom: 24px;
+  }
+
+  .hero__lede { font-size: 18px; line-height: 1.3; margin-bottom: 32px; }
+
+  .cta { display: inline-flex; width: 244px; }
+
+  .hero__pane--right {
+    position: relative;
+    order: 3;
+    left: auto;
+    top: auto;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 827 / 1053;
+    max-height: 720px;
+  }
+
+  .showcase__copy { display: block; }
+
+  .showcase__eyebrow,
+  .showcase__card,
+  .showcase__copy,
+  .dots { position: absolute; }
+
+  .showcase__card {
+    left: 50%;
+    top: 20%;
+    width: 40%;
+    height: auto;
+    aspect-ratio: 301 / 423;
+    transform: translateX(-50%);
+    border-radius: 5.2%;
+  }
+
+  .showcase__copy {
+    left: 8%;
+    right: 8%;
+    top: 68%;
+    text-align: center;
+  }
+
+  .showcase__title,
+  .showcase__sub {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: auto;
+    height: auto;
+  }
+
+  .showcase__title { font-size: clamp(24px, 6.4vw, 40px); line-height: 0.9; }
+  .showcase__sub { margin-top: 14px; font-size: clamp(13px, 3vw, 18px); line-height: 1.3; }
+
+  .dots { left: 50%; top: auto; bottom: 6%; transform: translateX(-50%); }
+
+  /* --- features ------------------------------------------------------- */
+  .features__title {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: auto;
+    height: auto;
+    margin-bottom: 40px;
+    font-size: clamp(40px, 12vw, 96px);
+    line-height: 0.9;
+    transform: none;
+  }
+
+  /* Each feature card is a pixel-locked composition, so instead of pulling it
+     apart it is scaled down as a whole to the width of the single column.
+     js/script.js supplies --card-scale and the slot height. */
+  .features__grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .fcard-slot {
+    display: block;
+    position: relative;
+    width: 100%;
+    max-width: 549px;
+    overflow: hidden;
+  }
+
+  .fcard {
+    left: 0;
+    top: 0;
+    transform: translateY(var(--crop-shift, 0px)) scale(var(--card-scale, 1));
+    transform-origin: top left;
+  }
+
+  /* The top 241px of these two cards sit above their surface and hold only
+     the transparent half of the decorative rings, so the empty band is
+     trimmed rather than carried into the single-column stack. */
+  .fcard--security,
+  .fcard--staking { --crop-top: 241; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; }
+}
