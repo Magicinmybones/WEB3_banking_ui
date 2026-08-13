@@ -197,6 +197,8 @@ button { font: inherit; color: inherit; }
   align-items: center;
   gap: 8px;
   height: 46px;
+  /* driven during the section transition */
+  transform: translateX(var(--pill-x, 0px));
 }
 
 .pill {
@@ -243,6 +245,31 @@ button { font: inherit; color: inherit; }
 .hero .logo { left: 39px; top: 37px; }
 .hero .navlinks { left: 96.76px; top: 37px; }
 .hero .btn-white { left: auto; right: 40px; top: 37px; }
+
+/* --------------------------------------------------------------------------
+   Section transition
+   The header is pinned; everything else in a section lives in a "scene" that
+   the transition translates, scales and fades. Measurements and easings are
+   taken frame by frame from the reference recording - see js/script.js.
+   -------------------------------------------------------------------------- */
+.hero__scene,
+.lifestyle__scene {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 50%;
+}
+
+.hero__scene {
+  opacity: var(--scene-opacity, 1);
+  transform: translateY(var(--scene-y, 0px)) scale(var(--scene-scale, 1));
+}
+
+/* section 2 arrives in two passes: the heading leads, the cards follow */
+.lifestyle__title { opacity: var(--title-opacity, 1); }
+.lcard { opacity: var(--card-opacity, 1); }
+
+.is-transitioning .hero__scene,
+.is-transitioning .lifestyle__scene { will-change: transform, opacity; }
 
 .hero__pane {
   position: absolute;
@@ -435,9 +462,12 @@ button { font: inherit; color: inherit; }
    Coordinates below are panel-relative; card children are relative to their
    own card group, whose origin is given above each block.
    ========================================================================== */
-.lifestyle .logo { left: 39px; top: 23px; }
-.lifestyle .navlinks { left: calc(50% - 142.5px); top: 23px; }
-.lifestyle .btn-white { left: auto; right: 40px; top: 23px; }
+/* The reference prototype carries one persistent header through the section
+   transition: it holds section 1's y while only the pills slide across to
+   section 2's centred x, so this bar sits at 37px rather than its frame's 23px. */
+.lifestyle .logo { left: 39px; top: 37px; }
+.lifestyle .navlinks { left: calc(50% - 142.5px); top: 37px; }
+.lifestyle .btn-white { left: auto; right: 40px; top: 37px; }
 
 .lifestyle__title {
   position: absolute;
@@ -924,9 +954,23 @@ button { font: inherit; color: inherit; }
      trimmed rather than carried into the single-column stack. */
   .lcard--security,
   .lcard--staking { --crop-top: 241; }
+
+  /* no section transition below the breakpoint - the page just flows */
+  .hero__scene,
+  .lifestyle__scene {
+    display: contents;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   * { transition: none !important; }
+
+  /* the transition is skipped entirely; scenes rest in their final state */
+  .hero__scene,
+  .lifestyle__scene {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .navlinks { transform: none !important; }
 }
