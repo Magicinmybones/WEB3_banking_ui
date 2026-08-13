@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seamless Web3 Banking</title>
+<meta name="description" content="Bridge the gap between your digital assets and the real world.">
+<link rel="icon" href="assets/svg/logo.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/figtree-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/instrument-sans-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Reusable gradient definitions for the decorative stroke-only ellipses -->
+<svg class="svg-defs" aria-hidden="true" focusable="false" width="0" height="0">
+  <defs>
+    <linearGradient id="ringDown" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0.5436" stop-color="#999999" stop-opacity="0"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.14"/>
+    </linearGradient>
+    <linearGradient id="ringUp" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0.5436" stop-color="#999999" stop-opacity="0"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.14"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div class="viewport" id="viewport">
+<div class="stage" id="stage">
+
+  <!-- ============================ HERO PANEL ============================ -->
+  <section class="panel hero" id="top">
+
+    <div class="hero__pane hero__pane--left"></div>
+
+    <div class="hero__pane hero__pane--right showcase" id="cards">
+      <img class="showcase__bg" src="assets/images/hero-mountain-base.jpg" alt="" aria-hidden="true">
+      <img class="showcase__peak" src="assets/images/hero-mountain-peak.webp" alt="" aria-hidden="true">
+
+      <p class="showcase__eyebrow">Limitless Crypto Banking</p>
+
+      <img class="showcase__card" src="assets/images/visa-card.png"
+           width="301" height="423" alt="Brushed metal Visa card">
+
+      <div class="showcase__copy" id="spending">
+        <h2 class="showcase__title">Global<br>Spending</h2>
+        <p class="showcase__sub">Spend your crypto instantly<br>anywhere in the world</p>
+      </div>
+
+      <div class="dots" role="group" aria-label="Card showcase">
+        <button class="dot is-active" type="button" aria-pressed="true" aria-label="Show card 1"></button>
+        <button class="dot" type="button" aria-pressed="false" aria-label="Show card 2"></button>
+        <button class="dot" type="button" aria-pressed="false" aria-label="Show card 3"></button>
+      </div>
+    </div>
+
+    <header class="topbar">
+      <a class="logo" href="#top" aria-label="Home">
+        <img src="assets/svg/logo.svg" width="47" height="46" alt="">
+      </a>
+
+      <nav class="navlinks" aria-label="Primary">
+        <a class="pill" href="#features">Features</a>
+        <a class="pill" href="#cards">Cards</a>
+        <a class="pill" href="#spending">Spending</a>
+      </nav>
+
+      <a class="btn-white btn-white--sm" href="#top">Get Early Access</a>
+    </header>
+
+    <div class="hero__content">
+      <h1 class="hero__title">Seamless<br>Web3<br>Banking</h1>
+      <p class="hero__lede">Bridge the gap between your digital<br>assets and the real world</p>
+
+      <a class="cta" href="#top">
+        <span class="cta__label">Get Early Access</span>
+        <span class="cta__arrow"><img src="assets/svg/arrow-up.svg" width="21" height="21" alt=""></span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ========================== FEATURES PANEL ========================== -->
+  <section class="panel features" id="features">
+
+    <header class="topbar topbar--centered">
+      <a class="logo" href="#top" aria-label="Home">
+        <img src="assets/svg/logo.svg" width="47" height="46" alt="">
+      </a>
+
+      <nav class="navlinks" aria-label="Section">
+        <a class="pill" href="#features">Features</a>
+        <a class="pill" href="#cards">Cards</a>
+        <a class="pill" href="#spending">Spending</a>
+      </nav>
+
+      <a class="btn-white btn-white--sm" href="#top">Get Early Access</a>
+    </header>
+
+    <h2 class="features__title">Your Digital<br>Lifestyle</h2>
+
+    <div class="features__grid">
+
+      <!-- ---------- Non-custodial security ---------- -->
+      <div class="fcard-slot">
+      <article class="fcard fcard--security">
+        <div class="fcard__body"></div>
+
+        <svg class="ring ring--security" viewBox="0 0 481 481" aria-hidden="true" focusable="false">
+          <circle cx="240.5" cy="240.5" r="240" fill="none" stroke="url(#ringDown)" stroke-width="1"/>
+        </svg>
+
+        <span class="tag tag--security">State-of-the-art</span>
+
+        <div class="keyplate">
+          <div class="keyplate__inner"></div>
+        </div>
+
+        <!-- Figma stacks this icon twice in soft-light; both instances are kept -->
+        <img class="keyplate__icon" src="assets/svg/key.svg" width="73" height="73" alt="">
+        <img class="keyplate__icon" src="assets/svg/key.svg" width="73" height="73" alt="">
+
+        <div class="fcard__text">
+          <h3 class="fcard__title">Non-Custodial<br>Security</h3>
+          <p class="fcard__desc">Your keys, your money. State-of-the-art<br>encryption included.</p>
+        </div>
+      </article>
+      </div>
+
+      <!-- ---------- Lightning transfers ---------- -->
+      <div class="fcard-slot">
+      <article class="fcard fcard--transfers">
+        <div class="fcard__body">
+          <img class="globe" src="assets/images/earth.jpg" alt="" aria-hidden="true">
+          <div class="globe-fade"></div>
+        </div>
+
+        <div class="fcard__text">
+          <h3 class="fcard__title">Lightning<br>Transfers</h3>
+          <p class="fcard__desc">Send funds across the globe<br>to any wallet or bank account</p>
+        </div>
+
+        <svg class="ring ring--transfers" viewBox="0 0 481 481" aria-hidden="true" focusable="false">
+          <circle cx="240.5" cy="240.5" r="240" fill="none" stroke="url(#ringUp)" stroke-width="1"/>
+        </svg>
+
+        <span class="tag tag--wallet">Any wallet</span>
+        <span class="tag tag--bank">Bank account</span>
+        <span class="node-dot"></span>
+      </article>
+      </div>
+
+      <!-- ---------- Automated staking ---------- -->
+      <div class="fcard-slot">
+      <article class="fcard fcard--staking">
+        <div class="fcard__body"></div>
+
+        <div class="fcard__text">
+          <h3 class="fcard__title">Automated<br>Staking</h3>
+          <p class="fcard__desc">Earn passive income on your balances<br>while still keeping them ready</p>
+        </div>
+
+        <div class="orbit">
+          <svg class="ring ring--outer" viewBox="0 0 505 505" aria-hidden="true" focusable="false">
+            <circle cx="252.5" cy="252.5" r="252" fill="none" stroke="url(#ringDown)" stroke-width="1"/>
+          </svg>
+          <svg class="ring ring--inner" viewBox="0 0 265 265" aria-hidden="true" focusable="false">
+            <circle cx="132.5" cy="132.5" r="132" fill="none" stroke="url(#ringDown)" stroke-width="1"/>
+          </svg>
+
+          <img class="orbit__card" src="assets/images/staking-card.png"
+               width="346" height="264" alt="Brushed black Visa card">
+
+          <div class="orbit__badge">
+            <div class="orbit__badge-inner"></div>
+            <img class="orbit__bolt" src="assets/svg/bolt.svg" width="38" height="39" alt="">
+          </div>
+
+          <span class="tag tag--yield">2% monthly</span>
+        </div>
+      </article>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+</div>
+
+<script src="js/script.js"></script>
+</body>
+</html>
