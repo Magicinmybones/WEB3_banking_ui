@@ -147,6 +147,9 @@ button { font: inherit; color: inherit; }
 .viewport {
   display: flex;
   justify-content: center;
+  /* the stage must keep its own layout height: stretching it to the height
+     the script sets would feed that value back into the next measurement */
+  align-items: flex-start;
   overflow: hidden;
 }
 
