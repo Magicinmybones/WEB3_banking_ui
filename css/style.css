@@ -1299,7 +1299,10 @@ button { font: inherit; color: inherit; }
 }
 
 /* ==========================================================================
-   9. Tablet architecture (600px - 1199.98px)
+   9. Compact architecture (under 1199.98px)
+
+   Written for tablets and unchanged there; section 10 refines it for phones
+   rather than replacing it, so the two share one set of mechanics.
 
    The artboard is no longer scaled here, so the frames are re-composed at
    their native type sizes instead of being shrunk. Nothing is removed and no
@@ -1318,7 +1321,7 @@ button { font: inherit; color: inherit; }
      - the nav row folds into a burger that opens the very same links and
        button on a surface built from the section 2 card treatment.
    ========================================================================== */
-@media (min-width: 600px) and (max-width: 1199.98px) {
+@media (max-width: 1199.98px) {
   :root {
     /* outer margin and rhythm: tighter than desktop, still unmistakably the
        same generous spacing language */
@@ -1666,6 +1669,237 @@ button { font: inherit; color: inherit; }
   .lcard-slot:last-child {
     grid-column: 1 / -1;
     width: calc((100% - var(--tgap)) / 2);
+  }
+}
+
+/* ==========================================================================
+   10. Mobile architecture (<= 599.98px)
+
+   Where the breakpoint comes from
+   -------------------------------
+   The compact architecture above holds all the way down to 600px, which is
+   its own floor, so mobile begins exactly where it ends - it cannot start any
+   later. What actually fails first below it is the feature card. It is a
+   pixel-locked 548px composition scaled as a unit, so its type scales with
+   it. Measured on the rendered page:
+
+     viewport   card scale   description   label
+     560px         0.95         17.1        13.3
+     480px         0.80         14.5        11.3
+     440px         0.73         13.2        10.2
+     375px         0.61         11.0         8.6   <- broken
+     320px         0.51          9.2         7.2
+
+   Below roughly 440px it falls under the same 13px body / 10px label floor
+   the artboard itself hands over at, and no phone in portrait is wider than
+   that. So the card stops being scaled here.
+
+   What replaces it keeps the frame's own vertical composition - every offset
+   below is the Figma y coordinate measured from the card surface - and its
+   native element sizes, and only re-anchors the artwork horizontally to the
+   card's centre. The copy returns to normal flow so it can wrap. At the top
+   of this band the card is ~550px wide and the result is the frame's own
+   composition; it then narrows without ever shrinking its type. That is why
+   the 600px boundary is not a visible jump.
+   ========================================================================== */
+@media (max-width: 599.98px) {
+  :root {
+    /* the page margin tightens but stays a margin - content never reaches
+       the edge */
+    --pad: clamp(16px, 5vw, 24px);
+    --tgap: clamp(14px, 4vw, 22px);
+  }
+
+  /* The menu takes the page width rather than hanging off one corner, so it
+     sits inside the same margin every other surface uses. Both edges are
+     anchored: the bar it hangs from spans the viewport, so a percentage width
+     would measure against that and overhang the left. */
+  .navmenu {
+    left: var(--pad);
+    right: var(--pad);
+    width: auto;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* --- section 1: hero ----------------------------------------------- */
+  /* ------------------------------------------------------------------ */
+  .hero__content { padding: clamp(22px, 6vw, 34px); }
+
+  .hero__title { font-size: clamp(40px, 13vw, 72px); }
+  .hero__lede {
+    font-size: clamp(16px, 4.4vw, 19px);
+    margin-bottom: clamp(22px, 6vw, 32px);
+  }
+
+  /* The media pane returns to the frame's own portrait proportion. A
+     landscape pane starves the card - the subject of the section - because
+     the card is sized by the row it is given, and on a phone that row is
+     what runs out first. */
+  .hero__pane--right {
+    aspect-ratio: 3 / 4;
+    min-height: 62dvh;
+    max-height: 620px;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* --- section 2: your digital lifestyle ----------------------------- */
+  /* ------------------------------------------------------------------ */
+  .lifestyle__title { font-size: clamp(40px, 12vw, 72px); }
+
+  /* the column is the page width now; the 549px cap belonged to the scaled
+     card, which no longer exists here */
+  .lcard-slot { max-width: none; }
+
+  .lcard {
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    width: 100%;
+    height: auto;
+    transform: none;
+  }
+
+  /* The surface becomes the card itself rather than a panel inside it. Each
+     card names its own surface in section 7, so these have to be card-scoped
+     too or they lose on specificity. */
+  .lcard--security .lcard__surface,
+  .lcard--staking .lcard__surface,
+  .lcard--transfers .lcard__surface {
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    height: auto;
+  }
+
+  /* the coordinate layer: artwork stays absolute against it, the copy flows
+     under the band reserved by its top padding */
+  .lcard__content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--art-h) clamp(16px, 5vw, 26px) var(--art-foot);
+  }
+
+  .lcard__title,
+  .lcard__desc {
+    position: static;
+    left: auto;
+    top: auto;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+  }
+  .lcard__desc { margin-top: 22px; }
+
+  /* the frame's hard line breaks are cut for a 547px card; where a phone has
+     to wrap them again, balance the result rather than leaving a stray word */
+  .lcard__title,
+  .lcard__desc,
+  .showcase__sub { text-wrap: balance; }
+
+  /* the rings keep their proportion to the card and their anchor to the
+     artwork, so they arc exactly as they do in the frame */
+  .lring {
+    left: 50%;
+    height: auto;
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+  }
+
+  .ltag,
+  .keyplate,
+  .keyplate__well,
+  .orbit__card,
+  .orbit__badge,
+  .orbit__badge-inner,
+  .orbit__bolt {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* Each band is the frame's own gap expressed against the card's width, so
+     the composition keeps its proportions as the card narrows instead of
+     leaving the artwork stranded in a fixed 411px of air. At the top of this
+     band they resolve to the frame's own numbers, which is what makes the
+     600px boundary invisible. */
+
+  /* --- card 1: non-custodial security -------------------------------- */
+  /* 317px of artwork, then the frame's 94px gap (17.2% of its 547px card) */
+  .lcard--security { --art-h: calc(317px + 17.2%); --art-foot: max(40px, 11.8%); }
+  .lring--security { top: 0; width: 88%; }
+  .ltag--soa { top: 63px; }
+  .keyplate { top: 128px; }
+  .keyplate__well { top: 145px; }
+  .keyplate__key {
+    left: 50%;
+    top: 186px;
+    transform: translateX(-50%) rotate(90deg);
+  }
+
+  /* --- card 2: automated staking ------------------------------------- */
+  /* the orbit card is the tallest artwork and shrinks with the card once it
+     is narrower than its 346px render; either way the frame's 8px gap to the
+     title is preserved */
+  .lcard--staking {
+    --art-h: min(412px, calc(148px + 76.3%));
+    --art-foot: max(40px, 11.8%);
+  }
+  .lring--orbit-outer { top: 11.5px; width: 92.2%; }
+  .lring--orbit-inner { left: 48.4%; top: 9.5px; width: 48.4%; }
+  .ltag--yield { top: 38px; }
+  .orbit__card { top: 140px; width: min(346px, 100%); height: auto; }
+  .orbit__badge { top: 94px; }
+  .orbit__badge-inner { top: 104px; }
+  .orbit__bolt { top: 123px; }
+
+  /* --- card 3: lightning transfers ----------------------------------- */
+  /* the title sits 77% of the way down the globe, where the fade has already
+     resolved to the card's own colour - so it tracks the globe, not a pixel */
+  .lcard--transfers {
+    --art-h: calc(98px + 57.8%);
+    --art-foot: max(40px, 11.8%);
+  }
+  .globe,
+  .globe-fade {
+    left: 0;
+    right: 0;
+    top: 98px;
+    /* an explicit width: a replaced element takes its intrinsic size from
+       `auto` and ignores `right`, so the clip would render at 1080px */
+    width: 100%;
+    height: auto;
+  }
+  .globe { aspect-ratio: 545 / 411; }
+  .globe-fade { aspect-ratio: 548 / 413; }
+  /* the ring's centre sits 223.5px below the globe's top in the frame, which
+     is 40.7% of the card's width - a percentage margin resolves against that
+     width, so the arc tracks the card instead of a fixed offset */
+  .lring--transfers {
+    top: 98px;
+    margin-top: 40.7%;
+    width: 87.6%;
+  }
+  /* these two hang off the card's edges rather than its centre, so they opt
+     out of the centring transform above */
+  .ltag--wallet { left: 8%; top: 123px; transform: none; }
+  .ltag--bank { left: auto; right: 12.6%; top: 94px; transform: none; }
+
+  /* The node's travel is drawn from a path measured in the frame's own
+     coordinates (`M 61 198 A 240.5 ...`). The scaled card carries it fine,
+     but nothing scales here, so the dot would leave the artwork entirely. It
+     keeps its place in the composition instead - the globe still loops. */
+  .transfer-node-path,
+  .has-transfer-loop .transfer-node-path {
+    left: 33.5%;
+    top: 89px;
+    offset-path: none;
+    animation: none;
+    will-change: auto;
   }
 }
 

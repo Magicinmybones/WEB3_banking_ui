@@ -13,6 +13,10 @@
   /* The scaled artboard runs down to 1200px, where its type stops holding up
      and the tablet architecture takes over - see section 8 of the stylesheet. */
   var DESKTOP_QUERY = '(min-width: 1200px)';
+  /* Between the artboard and the phone layout the feature cards are scaled as
+     whole compositions; below it they are laid out at native size instead, so
+     nothing needs measuring - see section 10 of the stylesheet. */
+  var COMPACT_QUERY = '(min-width: 600px) and (max-width: 1199.98px)';
 
   var stage = document.getElementById('stage');
 
@@ -43,7 +47,20 @@
       stage.style.removeProperty('--scale');
       stage.style.removeProperty('--layout-width');
       stage.style.removeProperty('--layout-height');
-      scaleFeatureCards();
+      if (window.matchMedia(COMPACT_QUERY).matches) scaleFeatureCards();
+      else releaseFeatureCards();
+    }
+  }
+
+  /* hand the cards back to the stylesheet: the phone layout sizes them from
+     their own content, so a measured height and scale would fight it */
+  function releaseFeatureCards() {
+    var slots = document.querySelectorAll('.lcard-slot');
+
+    for (var i = 0; i < slots.length; i++) {
+      slots[i].style.removeProperty('--card-scale');
+      slots[i].style.removeProperty('--crop-shift');
+      slots[i].style.removeProperty('height');
     }
   }
 

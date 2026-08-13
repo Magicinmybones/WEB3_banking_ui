@@ -80,9 +80,7 @@ a proportional artboard:
   while their pixel-locked illustrations stay centred and undistorted.
   Section-to-section scroll snapping lands each panel cleanly.
 * **600 – 1199px** — the tablet architecture, below.
-* **≤ 599px** — the two panels reflow into a single column at readable type
-  sizes. The three feature cards are pixel-locked compositions, so each is
-  scaled as a unit rather than pulled apart.
+* **≤ 599px** — the mobile architecture, below.
 
 ### Where the tablet breakpoint comes from
 
@@ -145,13 +143,61 @@ at their native type sizes. Nothing is removed and no component is redrawn.
 The section transition and scroll snapping belong to the scaled artboard and
 are not used below 1200px, where the page simply flows.
 
+### Where the mobile breakpoint comes from
+
+The compact architecture holds all the way down to 600px, which is its own
+floor, so mobile begins exactly where it ends — it cannot start any later.
+What fails first below it is the feature card: it is a pixel-locked 548px
+composition scaled as a unit, so its type scales with it.
+
+| viewport | card scale | description | label |
+| --- | --- | --- | --- |
+| 560px | 0.95 | 17.1 | 13.3 |
+| 480px | 0.80 | 14.5 | 11.3 |
+| 440px | 0.73 | 13.2 | 10.2 |
+| 375px | 0.61 | **11.0** | **8.6** |
+| 320px | 0.51 | **9.2** | **7.2** |
+
+Below roughly 440px it falls under the same 13px body / 10px label floor the
+artboard hands over at, and no phone in portrait is wider than that.
+
+### The mobile architecture
+
+* **Feature cards.** The card stops being scaled. It keeps the frame's own
+  vertical composition — every offset is the Figma y coordinate measured from
+  the card surface — and its native element sizes, and only re-anchors the
+  artwork horizontally to the card's centre. The copy returns to normal flow
+  so it can wrap. The gaps are expressed against the card's width rather than
+  in pixels, so the composition keeps its proportions as the card narrows
+  instead of leaving the artwork stranded in a fixed band. At the top of the
+  band they resolve to the frame's own numbers, which is what makes the 600px
+  boundary invisible: the description holds 18px and the labels 14px at every
+  width down to 320px, where they were 9.2px and 7.2px before.
+* **Hero.** The media pane returns to the frame's own portrait proportion. A
+  landscape pane starves the card — the subject of the section — because the
+  card is sized by the row it is given, and on a phone that row runs out
+  first. The card goes from 134px wide to 207px at 375px.
+* **Navigation.** The single fixed bar and its burger, which the compact
+  architecture already carries, now reach phones too; the nav row used to wrap
+  onto two lines here. The menu takes the page width instead of hanging off
+  one corner.
+* **Copy.** Where a phone has to wrap the frame's hard line breaks again, the
+  result is balanced rather than left with a stray word.
+
+One adaptation was unavoidable: the transfer node's travel is drawn from a
+path measured in the frame's own coordinates. The scaled card carries it
+fine, but nothing scales on mobile, so the dot would leave the artwork
+entirely — it keeps its place in the composition instead, and the globe clip
+still loops.
+
 ## Verifying the responsive work
 
 Renders were diffed pixel by pixel against the same commit's output at
 1200 × 800/900, 1280 × 800, 1366 × 768, 1440 × 900, 1600 × 1000, 1920 × 1080
 and at 375 × 812, 500 × 900, 599 × 900: **zero differing pixels**, so neither
 the desktop artboard nor the small-viewport reflow moved. Thirty viewport
-sizes from 1440px down to 600px were then checked for horizontal overflow,
+sizes from 1440px down to 600px, and sixteen more from 599px to 320px, were
+then checked for horizontal overflow,
 elements escaping their panel, internal scrollbars, collisions between the
 showcase pieces and between the feature cards, card aspect distortion, and
 that the burger and the nav row are never both present — all clean.
