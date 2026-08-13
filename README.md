@@ -95,6 +95,38 @@ format leaves ambiguous, was fitted against the reference over 48 candidate
 orientations; the winner matches the transform-handle derivation
 (`from 180deg`).
 
+## Section transition
+
+Scrolling between the two sections plays the transition from the reference
+recording. Every value below was measured off that recording frame by frame
+at 60fps and fitted, rather than eyeballed:
+
+| what | from → to | timing | curve |
+| --- | --- | --- | --- |
+| section 1 scene | opacity 1 → 0 | 0–800ms | linear |
+| section 1 scene | translateY 0 → −3150px | 0–800ms | `2^(9.1(u−1))` ease-in, fit rms 3.4px |
+| section 1 scene | scale 1 → 0.961 | 0–800ms | `1 − 0.039·u^0.62`, fit rms 0.001 |
+| nav pills | x 96.76px → section 2's centred x | 17–750ms | `cubic-bezier(.42,.09,0,1)`, fit rmse 0.002 |
+| section 2 heading | opacity 0 → 1 | 750–1333ms | ease-out, p 2.2 |
+| section 2 cards | opacity 0 → 1 | 770–1670ms | linear |
+
+The logo and the "Get Early Access" button never move: the recording carries
+one persistent header through the transition, which is why section 2's bar is
+aligned to section 1's 37px rather than its own frame's 23px. At the 800ms
+mark both scenes are invisible and the two panels are pixel-identical, so the
+scroll is moved between slots there and the cut cannot be seen. The
+transition is desktop-only and is skipped under `prefers-reduced-motion`.
+
+Verified against the recording (46 transition frames, 31 entrance frames):
+
+| measurement | mean error | max error |
+| --- | --- | --- |
+| nav pill x | +0.7px | 3.0px |
+| section 1 opacity | −0.007 | 0.028 |
+| section 1 vertical position | −1.0px | 10.5px |
+| section 2 heading opacity | +0.003 | 0.056 |
+| section 2 card opacity | −0.004 | 0.079 |
+
 ## Interactions
 
 Only what the file represents:
