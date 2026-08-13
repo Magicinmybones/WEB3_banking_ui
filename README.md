@@ -128,7 +128,17 @@ at their native type sizes. Nothing is removed and no component is redrawn.
   one column's width, so all three keep the same scale. Below that the grid
   goes to one column and the cards run at their native size — they are 1×
   exports, so they are never upscaled.
-* **Navigation.** The nav row folds into a burger; see below.
+* **Navigation.** One bar for the whole page. Each frame carries its own nav
+  bar, which is right on desktop — the panels are separate boards and only one
+  is ever on screen — but once they reflow into a single scrolling document it
+  shows as two stacked bars. Section 2's copy of the chrome stands down and
+  section 1's is lifted out of its panel onto the viewport, fixed to the top,
+  serving both sections. No destination is lost: the two bars carried the same
+  three links and the same button. It reads as no surface at all over the
+  panel's black at rest, and picks up a tint and blur — the glass treatment
+  the tags and badge already use — once artwork scrolls under it. Both panels
+  inset their content by the bar's height, and in-page jumps clear it. The nav
+  row itself folds into a burger; see below.
 * **Margins** scale with the viewport (`clamp`) instead of holding the desktop
   values or collapsing to the edge.
 

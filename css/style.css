@@ -1324,12 +1324,16 @@ button { font: inherit; color: inherit; }
        same generous spacing language */
     --pad: clamp(24px, 3.2vw, 40px);
     --tgap: clamp(18px, 2.4vw, 30px);
+    /* the fixed bar's full height: the 46px chrome row plus its own padding */
+    --bar-h: calc(46px + var(--pad) * 2);
   }
 
   .panel {
     display: flex;
     flex-direction: column;
-    padding: var(--pad) var(--pad) calc(var(--pad) + 6px);
+    /* the top inset is the fixed bar's height rather than a nav row of the
+       panel's own - see the single-bar block below */
+    padding: calc(var(--bar-h) + var(--tgap)) var(--pad) calc(var(--pad) + 6px);
     border-radius: clamp(26px, 2.6vw, 33px);
   }
 
@@ -1340,8 +1344,43 @@ button { font: inherit; color: inherit; }
     flex-wrap: nowrap;
     justify-content: space-between;
     gap: 16px;
-    margin-bottom: clamp(26px, 4vw, 44px);
   }
+
+  /* --- one bar for the whole page ---------------------------------------
+     Each Figma frame carries its own nav bar, which is right on desktop:
+     the panels are separate boards and only one is ever on screen. Once the
+     panels reflow into one scrolling document that becomes two stacked bars,
+     so section 2's copy of the chrome steps aside and section 1's is lifted
+     out of its panel onto the viewport, where it serves both sections. No
+     destination is lost - the two bars held the same three links and the
+     same button.
+     ---------------------------------------------------------------------- */
+  .lifestyle .topbar { display: none; }
+
+  .hero .topbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 100;
+    margin: 0;
+    padding: var(--pad);
+    /* over the panel's own black at rest this reads as no surface at all;
+       once artwork scrolls under it, the tint and blur keep the logo and the
+       burger legible - the same glass treatment the tags and badge use */
+    background: rgba(2, 2, 2, 0.72);
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+  }
+
+  /* the bar now spans the viewport, so its menu is inset by the page margin
+     rather than pinned to the panel edge it used to sit inside */
+  .hero .topbar .navmenu { right: var(--pad); }
+
+  /* jumping to a section must clear the bar instead of landing under it */
+  .panel,
+  #cards,
+  #spending { scroll-margin-top: calc(var(--bar-h) + var(--tgap)); }
 
   .navburger {
     display: flex;
@@ -1593,12 +1632,13 @@ button { font: inherit; color: inherit; }
    the stacked composition, with no jump at some arbitrary device width. */
 @media (min-width: 600px) and (max-width: 1199.98px) and (min-aspect-ratio: 1 / 1) {
   .hero__scene {
-    /* 176px is the chrome this section puts around the scene at these widths
-       (panel padding, the nav row and its margin), so the hero lands inside
-       the viewport instead of just past it. Both columns are given the height
-       explicitly: it keeps the showcase's card row definite, so the card is
-       sized by the room it is given rather than by the asset's own height. */
-    --hero-h: clamp(430px, calc(100dvh - 176px), 720px);
+    /* Whatever the panel puts above and below the scene - the fixed bar, the
+       gap under it and the bottom padding - is taken off the viewport, so the
+       hero lands inside it instead of just past it. Both columns are given the
+       height explicitly: it keeps the showcase's card row definite, so the
+       card is sized by the room it is given rather than by the asset's own. */
+    --hero-h: clamp(430px, calc(100dvh - var(--bar-h) - var(--tgap)
+                                        - var(--pad) - 6px), 720px);
     grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
     min-height: var(--hero-h);
   }
