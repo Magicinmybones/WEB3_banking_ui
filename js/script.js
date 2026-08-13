@@ -9,35 +9,38 @@
   'use strict';
 
   var DESIGN_WIDTH = 1685;
-  var MOBILE_BREAKPOINT = 900;
+  var DESIGN_HEIGHT = 1073;
+  var DESKTOP_QUERY = '(min-width: 901px)';
 
-  var viewport = document.getElementById('viewport');
   var stage = document.getElementById('stage');
 
   /* ---------------------------------------------------------------------
      1. Scaling
-     Above the artboard width the design renders 1:1. Below it the whole
-     stage is scaled, which keeps every proportion identical to Figma.
+     On desktop the artwork is uniformly scaled by the tighter viewport axis.
+     The panel then expands along the other axis, allowing its panes, card
+     spacing and edge-aligned chrome to fill the viewport without stretching
+     text, images or icons.
      Under the mobile breakpoint the stage reflows instead, and only the
      individual feature cards - which are pixel-locked compositions - are
      scaled to the width of the single column.
      --------------------------------------------------------------------- */
   function layout() {
     var width = document.documentElement.clientWidth;
+    var isDesktop = window.matchMedia(DESKTOP_QUERY).matches;
 
-    if (width > MOBILE_BREAKPOINT) {
-      var scale = Math.min(1, width / DESIGN_WIDTH);
+    if (isDesktop) {
+      var height = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      var scale = Math.min(width / DESIGN_WIDTH, height / DESIGN_HEIGHT);
+      var layoutWidth = width / scale;
+      var layoutHeight = height / scale;
+
       stage.style.setProperty('--scale', scale);
-
-      /* Release the height before measuring: the scale is only a paint-time
-         transform, so the wrapper has to be told how tall the result is, and
-         that measurement must never be taken while the previous answer is
-         still constraining the stage. */
-      viewport.style.height = 'auto';
-      viewport.style.height = stage.offsetHeight * scale + 'px';
+      stage.style.setProperty('--layout-width', layoutWidth + 'px');
+      stage.style.setProperty('--layout-height', layoutHeight + 'px');
     } else {
       stage.style.removeProperty('--scale');
-      viewport.style.removeProperty('height');
+      stage.style.removeProperty('--layout-width');
+      stage.style.removeProperty('--layout-height');
       scaleFeatureCards();
     }
   }
@@ -68,6 +71,9 @@
 
   window.addEventListener('resize', onResize);
   window.addEventListener('orientationchange', onResize);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', onResize);
+  }
   window.addEventListener('load', layout);
   layout();
 

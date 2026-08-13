@@ -35,9 +35,8 @@ the three chrome components that are byte-identical in both frames (logo,
 nav pills, white button) — and even those are *positioned* separately, each
 section placing them from its own frame. Section 2 owns its whole namespace
 (`.lifestyle`, `.lcard`, `.lring`, `.ltag`, …) and inherits no layout from
-section 1. The one measurement not taken from the file is `--panel-gap`:
-the frames are separate boards, so the panels need a seam once the mock-up
-background is dropped.
+section 1. On mobile, `--panel-gap` adds a small seam between the reflowed
+panels because the source frames are separate boards.
 
 Everything else comes straight out of the file: paint colours, gradient
 transforms (linear, radial and angular, converted to their CSS equivalents),
@@ -70,12 +69,16 @@ lands where Figma puts it.
 
 ## Responsive behaviour
 
-The file only contains desktop frames, so the design is not reinterpreted:
+The file only contains desktop frames, so the desktop design is preserved as
+a proportional artboard:
 
-* **≥ 1685px** — renders 1:1.
-* **900–1685px** — the whole artboard is scaled proportionally, so every
-  proportion stays identical to Figma.
-* **< 900px** — the two panels reflow into a single column at readable type
+* **≥ 901px** — each section occupies one dynamic viewport-sized slot. The
+  artwork scales uniformly from the limiting axis, then the panel expands
+  along the free axis. The two hero panes, edge controls and feature-card
+  spacing absorb that room fluidly, so the design fills the viewport without
+  side gutters or distorted content. Section-to-section scroll snapping lands
+  each panel cleanly.
+* **≤ 900px** — the two panels reflow into a single column at readable type
   sizes. The three feature cards are pixel-locked compositions, so each is
   scaled as a unit rather than pulled apart.
 
