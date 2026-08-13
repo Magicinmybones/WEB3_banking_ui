@@ -91,8 +91,10 @@
        pills   17 - 750ms   x 96.76px -> section 2's x
                               cubic-bezier(.42, .09, 0, 1)  (fit rmse 0.002)
        phase 2  section 2 arrives, staggered as measured
-                    heading  750 - 1333ms  opacity 0 -> 1  ease-out p2.2
-                    cards    770 - 1670ms  opacity 0 -> 1  linear
+                    heading       750 - 1333ms
+                    security     1060 - 1900ms
+                    transfers    1390 - 2350ms
+                    staking      1900 - 3400ms
 
      At the phase boundary both scenes are invisible and the two panels are
      pixel-identical (panel fill + pinned header), so the scroll is moved
@@ -102,8 +104,7 @@
   var PILL_MS = 733;
   var PILL_DELAY = 17;          // the pills start one frame after the scene
   var TITLE_AT = 750, TITLE_MS = 583;   // section 2 heading (eased)
-  var CARDS_AT = 770, CARDS_MS = 900;   // section 2 cards
-  var TOTAL_MS = CARDS_AT + CARDS_MS;
+  var TOTAL_MS = 3400;                  // final staking tag has settled
   var EXIT_TRAVEL = -3150;      // px, ease-in-expo amplitude (fitted)
   var EXIT_EXP = 9.1;           // exponent of the 2^(k(u-1)) ease-in (fitted)
   var EXIT_SCALE = 0.039;       // 1 -> 0.961 (fitted)
@@ -115,7 +116,32 @@
   var heroScene = document.querySelector('.hero__scene');
   var featScene = document.querySelector('.lifestyle__scene');
   var heroPills = document.querySelector('.hero .navlinks');
+  var heroVideo = document.querySelector('.showcase__video');
+  var globeVideo = document.querySelector('.globe');
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function syncVideoMotion() {
+    if (heroVideo) {
+      if (reduced.matches) {
+        heroVideo.pause();
+      } else {
+        var playback = heroVideo.play();
+        if (playback && typeof playback.catch === 'function') {
+          playback.catch(function () { /* the poster remains as a fallback */ });
+        }
+      }
+    }
+
+    if (globeVideo && reduced.matches) {
+      globeVideo.pause();
+      featScene.classList.remove('has-transfer-loop');
+    }
+  }
+
+  if (typeof reduced.addEventListener === 'function') {
+    reduced.addEventListener('change', syncVideoMotion);
+  }
+  syncVideoMotion();
 
   /* cubic-bezier(.42,.09,0,1) - fitted to the pill track, rmse 0.0024 */
   function pillEase(t) {
@@ -136,6 +162,11 @@
 
   function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
 
+  function reveal(ms, start, duration) {
+    var t = clamp01((ms - start) / duration);
+    return 1 - Math.pow(1 - t, 2.2);
+  }
+
   /* how far the pills travel: section 2 centres them in the current panel */
   function pillTravel() {
     var panel = document.querySelector('.lifestyle');
@@ -144,7 +175,7 @@
       - PILL_HALF - HERO_PILL_X : 0;
   }
 
-  function paint(ms) {
+  function paintHeroTransition(ms) {
     var u = clamp01(ms / EXIT_MS);
     heroScene.style.setProperty('--scene-opacity', 1 - u);
     heroScene.style.setProperty('--scene-y', EXIT_TRAVEL * easeInExpo(u) + 'px');
@@ -152,11 +183,33 @@
       1 - EXIT_SCALE * Math.pow(u, EXIT_SCALE_EXP));
     heroPills.style.setProperty('--pill-x',
       pillTravel() * pillEase(clamp01((ms - PILL_DELAY) / PILL_MS)) + 'px');
-    var tu = clamp01((ms - TITLE_AT) / TITLE_MS);
-    featScene.style.setProperty('--title-opacity',
-      1 - Math.pow(1 - tu, 2.2));
-    featScene.style.setProperty('--card-opacity',
-      clamp01((ms - CARDS_AT) / CARDS_MS));
+  }
+
+  function paintFeatureEntrance(ms) {
+    featScene.style.setProperty('--title-opacity', reveal(ms, TITLE_AT, TITLE_MS));
+
+    /* Independent tracks reproduce the observed left-to-right build: each
+       card establishes its surface/copy before its illustration resolves. */
+    featScene.style.setProperty('--security-base', reveal(ms, 1060, 420));
+    featScene.style.setProperty('--security-art', reveal(ms, 1480, 420));
+    featScene.style.setProperty('--transfer-base', reveal(ms, 1390, 430));
+    featScene.style.setProperty('--transfer-art', reveal(ms, 1880, 470));
+    featScene.style.setProperty('--staking-base', reveal(ms, 1900, 440));
+    featScene.style.setProperty('--staking-rings', reveal(ms, 2220, 430));
+    featScene.style.setProperty('--staking-card', reveal(ms, 2580, 430));
+    featScene.style.setProperty('--staking-badge', reveal(ms, 2920, 340));
+    featScene.style.setProperty('--staking-tag', reveal(ms, 3140, 260));
+  }
+
+  /* Section 2 leaves as one completed composition. Its entry tracks are not
+     touched, so cards and artwork never perform an unintended reverse reveal. */
+  function paintFeatureSceneExit(progress) {
+    var u = clamp01(progress);
+    featScene.style.setProperty('--feature-scene-opacity', 1 - u);
+    featScene.style.setProperty('--feature-scene-y',
+      -EXIT_TRAVEL * easeInExpo(u) + 'px');
+    featScene.style.setProperty('--feature-scene-scale',
+      1 - EXIT_SCALE * Math.pow(u, EXIT_SCALE_EXP));
   }
 
   function clearPaint() {
@@ -164,13 +217,44 @@
       el.style.removeProperty('--scene-opacity');
       el.style.removeProperty('--scene-y');
       el.style.removeProperty('--scene-scale');
+      el.style.removeProperty('--feature-scene-opacity');
+      el.style.removeProperty('--feature-scene-y');
+      el.style.removeProperty('--feature-scene-scale');
       el.style.removeProperty('--title-opacity');
-      el.style.removeProperty('--card-opacity');
+      el.style.removeProperty('--security-base');
+      el.style.removeProperty('--security-art');
+      el.style.removeProperty('--transfer-base');
+      el.style.removeProperty('--transfer-art');
+      el.style.removeProperty('--staking-base');
+      el.style.removeProperty('--staking-rings');
+      el.style.removeProperty('--staking-card');
+      el.style.removeProperty('--staking-badge');
+      el.style.removeProperty('--staking-tag');
     });
     heroPills.style.removeProperty('--pill-x');
   }
 
   var running = false;
+
+  function resetGlobe() {
+    if (!globeVideo) return;
+    globeVideo.pause();
+    featScene.classList.remove('has-transfer-loop');
+    try { globeVideo.currentTime = 0; } catch (error) { /* metadata not ready */ }
+  }
+
+  function startGlobe() {
+    if (!globeVideo || reduced.matches || !globeVideo.paused) return;
+    /* The class and playback are started in the same task so the node and
+       video share a clock; waiting for the play promise can lag by frames. */
+    featScene.classList.add('has-transfer-loop');
+    var playback = globeVideo.play();
+    if (playback && typeof playback.catch === 'function') {
+      playback.catch(function () {
+        featScene.classList.remove('has-transfer-loop');
+      });
+    }
+  }
 
   function jumpTo(index) {
     var prev = document.documentElement.style.scrollBehavior;
@@ -184,21 +268,48 @@
     document.body.classList.add('is-transitioning');
     var start = null;
     var swapped = false;
+    var globeStarted = false;
+    var duration = forward ? TOTAL_MS : EXIT_MS * 2;
+
+    if (forward) resetGlobe();
+    else if (globeVideo) {
+      globeVideo.pause();
+      featScene.classList.remove('has-transfer-loop');
+    }
 
     function step(now) {
       if (start === null) start = now;
       var ms = now - start;
-      if (ms > TOTAL_MS) ms = TOTAL_MS;
-      var at = forward ? ms : TOTAL_MS - ms;
+      if (ms > duration) ms = duration;
 
-      /* swap slots at the boundary, where both scenes are invisible */
-      if (forward ? (at >= EXIT_MS && !swapped) : (at <= EXIT_MS && !swapped)) {
-        swapped = true;
-        jumpTo(forward ? 1 : 0);
+      if (forward) {
+        /* The slot swap occurs once Section 1 has fully disappeared. */
+        if (ms >= EXIT_MS && !swapped) {
+          swapped = true;
+          jumpTo(1);
+        }
+        paintHeroTransition(ms);
+        paintFeatureEntrance(ms);
+
+        if (ms >= 1880 && !globeStarted) {
+          globeStarted = true;
+          startGlobe();
+        }
+      } else if (ms < EXIT_MS) {
+        /* Keep every Section 2 entry track complete and transition the fully
+           assembled scene out as a single layer. */
+        paintHeroTransition(EXIT_MS);
+        paintFeatureSceneExit(ms / EXIT_MS);
+      } else {
+        if (!swapped) {
+          swapped = true;
+          jumpTo(0);
+        }
+        paintFeatureSceneExit(1);
+        paintHeroTransition(EXIT_MS - (ms - EXIT_MS));
       }
-      paint(at);
 
-      if (ms < TOTAL_MS) {
+      if (ms < duration) {
         requestAnimationFrame(step);
       } else {
         clearPaint();
@@ -253,7 +364,13 @@
 
   /* jumping straight to a section via a nav link must not leave a half-played
      scene behind */
-  window.addEventListener('hashchange', clearPaint);
+  window.addEventListener('hashchange', function () {
+    clearPaint();
+    if (window.location.hash === '#features' && !reduced.matches) {
+      resetGlobe();
+      startGlobe();
+    }
+  });
 
   /* ---------------------------------------------------------------------
      3. Navigation

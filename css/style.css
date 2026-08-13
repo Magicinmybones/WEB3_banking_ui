@@ -264,9 +264,90 @@ button { font: inherit; color: inherit; }
   transform: translateY(var(--scene-y, 0px)) scale(var(--scene-scale, 1));
 }
 
-/* section 2 arrives in two passes: the heading leads, the cards follow */
-.lifestyle__title { opacity: var(--title-opacity, 1); }
-.lcard { opacity: var(--card-opacity, 1); }
+.lifestyle__scene {
+  opacity: var(--feature-scene-opacity, 1);
+  transform: translateY(var(--feature-scene-y, 0px))
+    scale(var(--feature-scene-scale, 1));
+}
+
+/* Section 2 is painted as a measured, one-way entrance rather than one
+   blanket fade. Once revealed, these values stay complete. Upward navigation
+   uses the scene-level properties above and never reverses individual cards. */
+.lifestyle__title {
+  opacity: var(--title-opacity, 1);
+  filter: blur(calc((1 - var(--title-opacity, 1)) * 14px));
+}
+
+.lcard--security .lcard__surface,
+.lcard--security .lcard__title,
+.lcard--security .lcard__desc {
+  opacity: var(--security-base, 1);
+  filter: blur(calc((1 - var(--security-base, 1)) * 10px));
+}
+
+.lring--security,
+.keyplate,
+.keyplate__well,
+.keyplate__key,
+.ltag--soa {
+  opacity: var(--security-art, 1);
+  filter: blur(calc((1 - var(--security-art, 1)) * 9px));
+}
+
+.keyplate,
+.keyplate__well,
+.keyplate__key {
+  scale: calc(.84 + var(--security-art, 1) * .16);
+}
+
+.lcard--transfers .lcard__surface,
+.lcard--transfers .lcard__title,
+.lcard--transfers .lcard__desc {
+  opacity: var(--transfer-base, 1);
+  filter: blur(calc((1 - var(--transfer-base, 1)) * 10px));
+}
+
+.globe,
+.globe-fade,
+.lring--transfers,
+.ltag--wallet,
+.ltag--bank,
+.transfer-node-path {
+  opacity: var(--transfer-art, 1);
+  filter: blur(calc((1 - var(--transfer-art, 1)) * 9px));
+}
+
+.lcard--staking .lcard__surface,
+.lcard--staking .lcard__title,
+.lcard--staking .lcard__desc {
+  opacity: var(--staking-base, 1);
+  filter: blur(calc((1 - var(--staking-base, 1)) * 10px));
+}
+
+.lring--orbit-outer,
+.lring--orbit-inner {
+  opacity: var(--staking-rings, 1);
+}
+
+.orbit__card {
+  opacity: var(--staking-card, 1);
+  filter: blur(calc((1 - var(--staking-card, 1)) * 11px));
+  scale: calc(.9 + var(--staking-card, 1) * .1);
+}
+
+.orbit__badge,
+.orbit__badge-inner,
+.orbit__bolt {
+  opacity: var(--staking-badge, 1);
+  filter: blur(calc((1 - var(--staking-badge, 1)) * 8px));
+  scale: calc(.75 + var(--staking-badge, 1) * .25);
+}
+
+.ltag--yield {
+  opacity: var(--staking-tag, 1);
+  filter: blur(calc((1 - var(--staking-tag, 1)) * 7px));
+  scale: calc(.9 + var(--staking-tag, 1) * .1);
+}
 
 .is-transitioning .hero__scene,
 .is-transitioning .lifestyle__scene { will-change: transform, opacity; }
@@ -293,10 +374,10 @@ button { font: inherit; color: inherit; }
 }
 
 /* --- showcase (right pane) ----------------------------------------------- */
-.showcase__bg,
-.showcase__peak {
+.showcase__video {
   position: absolute;
   inset: 0;
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -394,6 +475,94 @@ button { font: inherit; color: inherit; }
   line-height: 108px;
   letter-spacing: -0.05em;
   text-transform: uppercase;
+}
+
+.hero__line { display: block; }
+
+/* --------------------------------------------------------------------------
+   Section 1 entrance
+   The reference reveals the three display lines in a tight blur stagger,
+   followed by the supporting copy and controls. The card scales in during
+   that reveal, then performs its separate linear Y-axis turn. It continues
+   past the edge-on reference pose and settles face-on, so it never vanishes.
+   These tracks live on descendants of .hero__scene, so the completed
+   section-to-section transition can continue to move the scene unchanged.
+   -------------------------------------------------------------------------- */
+@keyframes hero-line-enter {
+  from { opacity: 0; filter: blur(16px); }
+  to { opacity: 1; filter: blur(0); }
+}
+
+@keyframes hero-detail-enter {
+  from { opacity: 0; filter: blur(10px); transform: translateY(8px); }
+  to { opacity: 1; filter: blur(0); transform: translateY(0); }
+}
+
+@keyframes hero-cta-enter {
+  from { opacity: 0; filter: blur(6px); transform: scale(0.96); }
+  to { opacity: 1; filter: blur(0); transform: scale(1); }
+}
+
+@keyframes hero-card-motion {
+  0% {
+    opacity: 0;
+    filter: blur(10px);
+    transform: rotateY(0deg) scale(0.48);
+  }
+  15% {
+    opacity: 1;
+    filter: blur(0);
+    transform: rotateY(0deg) scale(1);
+  }
+  80% {
+    opacity: 1;
+    filter: blur(0);
+    transform: rotateY(270deg) scale(1);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: rotateY(360deg) scale(1);
+  }
+}
+
+@media (min-width: 901px) and (prefers-reduced-motion: no-preference) {
+  .hero__pane--right { perspective: 1400px; }
+
+  .hero__line {
+    animation: hero-line-enter 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .hero__line:nth-child(1) { animation-delay: 360ms; }
+  .hero__line:nth-child(2) { animation-delay: 460ms; }
+  .hero__line:nth-child(3) { animation-delay: 560ms; }
+
+  .hero__lede {
+    animation: hero-detail-enter 380ms 780ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .cta {
+    animation: hero-cta-enter 340ms 880ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    transform-origin: left center;
+  }
+
+  .showcase__card {
+    transform-origin: center;
+    transform-style: preserve-3d;
+    animation: hero-card-motion 4300ms 350ms linear both;
+    will-change: transform, opacity, filter;
+  }
+
+  .showcase__title {
+    animation: hero-detail-enter 380ms 820ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .showcase__sub {
+    animation: hero-detail-enter 380ms 930ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .dots {
+    animation: hero-detail-enter 300ms 1040ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
 }
 
 .hero__lede {
@@ -645,7 +814,9 @@ button { font: inherit; color: inherit; }
   top: 98px;
   width: 545px;
   height: 411px;
-  object-fit: cover;
+  /* The source is square but the artwork window is landscape. `contain`
+     preserves the globe's full crown; `cover` enlarged it and cut the top. */
+  object-fit: contain;
   object-position: center;
   mix-blend-mode: screen;
 }
@@ -678,14 +849,75 @@ button { font: inherit; color: inherit; }
   backdrop-filter: blur(17.95px);
 }
 
-.node-dot {
+.transfer-node-path {
   position: absolute;
   left: 184px;
   top: 89px;
   width: 9px;
   height: 9px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.node-dot {
+  display: block;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   background: var(--white);
+  box-shadow: 0 0 10px rgba(255, 255, 255, .45);
+}
+
+/* The reference's transfer node runs with the five-second globe cycle. The
+   path is the measured section of the same r=240.5 circle drawn by
+   .lring--transfers, from the wallet side through the crown to the bank side.
+   Motion and visibility are split across two nested elements. The path
+   wrapper resets only after its child has faded out, so the loop seam cannot
+   be rendered over or behind the globe. */
+@keyframes transfer-node-motion {
+  0%, 15% {
+    offset-distance: 0%;
+  }
+
+  80%, 99.99% {
+    offset-distance: 100%;
+  }
+
+  100% {
+    offset-distance: 0%;
+  }
+}
+
+@keyframes transfer-node-visibility {
+  0%, 8% {
+    opacity: 0;
+    transform: scale(.82);
+  }
+
+  15%, 80% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  87%, 100% {
+    opacity: 0;
+    transform: scale(.82);
+  }
+}
+
+.has-transfer-loop .transfer-node-path {
+  left: 0;
+  top: 0;
+  offset-path: path('M 61 198 A 240.5 240.5 0 0 1 451 166');
+  offset-rotate: 0deg;
+  offset-anchor: center;
+  animation: transfer-node-motion 5042ms linear infinite both;
+  will-change: offset-distance;
+}
+
+.has-transfer-loop .node-dot {
+  animation: transfer-node-visibility 5042ms linear infinite both;
+  will-change: opacity, transform;
 }
 
 .lcard--transfers .lcard__title { left: 174px; top: 413px; width: 192px; }
@@ -772,6 +1004,71 @@ button { font: inherit; color: inherit; }
 
 .lcard--staking .lcard__title { left: 127px; top: 653px; width: 286px; }
 .lcard--staking .lcard__desc { left: 106px; top: 733.05px; }
+
+/* --------------------------------------------------------------------------
+   Desktop feature-card track
+
+   The Figma hierarchy is one edge-to-edge three-column row: 10px panel
+   insets and approximately 10px between adjacent cards. On wide desktop
+   aspect ratios the stage grows beyond its 1685px design width, so fixed
+   left/centre/right anchors would turn that extra room into oversized gaps.
+   Instead, the columns absorb the available width while each pixel-locked
+   illustration remains centred inside its own surface.
+   -------------------------------------------------------------------------- */
+@media (min-width: 901px) {
+  .lifestyle__scene {
+    --feature-card-width: calc((100% - 40px) / 3);
+  }
+
+  .lcard {
+    width: var(--feature-card-width);
+  }
+
+  .lcard--security {
+    left: 10px;
+  }
+
+  .lcard--transfers {
+    left: calc(20px + var(--feature-card-width));
+  }
+
+  .lcard--staking {
+    right: 10px;
+  }
+
+  .lcard--security > .lcard__surface,
+  .lcard--transfers > .lcard__surface,
+  .lcard--staking > .lcard__surface {
+    width: 100%;
+  }
+
+  .lcard__content {
+    position: absolute;
+    top: 0;
+    height: 100%;
+  }
+
+  .lcard--security .lcard__content {
+    left: calc(50% - 273.5px);
+    width: 547px;
+  }
+
+  .lcard--transfers .lcard__content {
+    left: calc(50% - 274.5px);
+    width: 549px;
+  }
+
+  .lcard--staking .lcard__content {
+    left: calc(50% - 274px);
+    width: 548px;
+  }
+
+  /* Animation variables stay on the scene/card and continue to inherit into
+     the centred coordinate layer; no animated child receives layout shifts. */
+  .lcard__content > * {
+    max-width: none;
+  }
+}
 
 /* ==========================================================================
    8. Small viewports
@@ -964,7 +1261,10 @@ button { font: inherit; color: inherit; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  * { transition: none !important; }
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
 
   /* the transition is skipped entirely; scenes rest in their final state */
   .hero__scene,

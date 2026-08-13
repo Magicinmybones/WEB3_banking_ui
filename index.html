@@ -37,8 +37,10 @@
     <div class="hero__pane hero__pane--left"></div>
 
     <div class="hero__pane hero__pane--right showcase" id="cards">
-      <img class="showcase__bg" src="assets/images/hero-mountain-base.jpg" alt="" aria-hidden="true">
-      <img class="showcase__peak" src="assets/images/hero-mountain-peak.webp" alt="" aria-hidden="true">
+      <video class="showcase__video" autoplay muted loop playsinline preload="auto"
+             poster="assets/images/hero-mountain-poster.webp" aria-hidden="true">
+        <source src="assets/video/hero-mountain.mp4" type="video/mp4">
+      </video>
 
       <p class="showcase__eyebrow">Limitless Crypto Banking</p>
 
@@ -59,7 +61,11 @@
 
 
     <div class="hero__content">
-      <h1 class="hero__title">Seamless<br>Web3<br>Banking</h1>
+      <h1 class="hero__title">
+        <span class="hero__line">Seamless</span>
+        <span class="hero__line">Web3</span>
+        <span class="hero__line">Banking</span>
+      </h1>
       <p class="hero__lede">Bridge the gap between your digital<br>assets and the real world</p>
 
       <a class="cta" href="#top">
@@ -98,6 +104,7 @@
       <div class="lcard-slot">
       <article class="lcard lcard--security">
         <div class="lcard__surface"></div>
+        <div class="lcard__content">
 
         <svg class="lring lring--security" viewBox="0 0 481 481" aria-hidden="true" focusable="false">
           <circle cx="240.5" cy="240.5" r="240" fill="none" stroke="url(#ringDown)" stroke-width="1"/>
@@ -115,6 +122,7 @@
         <img class="keyplate__key" src="assets/svg/key.svg" width="73" height="73" alt="">
 
         <span class="ltag ltag--soa">State-of-the-art</span>
+        </div>
       </article>
       </div>
 
@@ -122,6 +130,7 @@
       <div class="lcard-slot">
       <article class="lcard lcard--staking">
         <div class="lcard__surface"></div>
+        <div class="lcard__content">
 
         <h3 class="lcard__title">Automated<br>Staking</h3>
         <p class="lcard__desc">Earn passive income on your balances<br>while still keeping them ready</p>
@@ -141,6 +150,7 @@
         <img class="orbit__bolt" src="assets/svg/bolt.svg" width="38" height="39" alt="">
 
         <span class="ltag ltag--yield">2% monthly</span>
+        </div>
       </article>
       </div>
 
@@ -148,8 +158,12 @@
       <div class="lcard-slot">
       <article class="lcard lcard--transfers">
         <div class="lcard__surface"></div>
+        <div class="lcard__content">
 
-        <img class="globe" src="assets/images/earth.jpg" alt="" aria-hidden="true">
+        <video class="globe" muted loop playsinline preload="auto"
+          poster="assets/images/globe-poster.webp" aria-hidden="true">
+          <source src="assets/video/globe.mp4" type="video/mp4">
+        </video>
         <div class="globe-fade"></div>
 
         <h3 class="lcard__title">Lightning<br>Transfers</h3>
@@ -161,7 +175,10 @@
 
         <span class="ltag ltag--wallet">Any wallet</span>
         <span class="ltag ltag--bank">Bank account</span>
-        <span class="node-dot"></span>
+        <span class="transfer-node-path" aria-hidden="true">
+          <span class="node-dot"></span>
+        </span>
+        </div>
       </article>
       </div>
 

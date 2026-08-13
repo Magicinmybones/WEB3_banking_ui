@@ -74,10 +74,11 @@ a proportional artboard:
 
 * **≥ 901px** — each section occupies one dynamic viewport-sized slot. The
   artwork scales uniformly from the limiting axis, then the panel expands
-  along the free axis. The two hero panes, edge controls and feature-card
-  spacing absorb that room fluidly, so the design fills the viewport without
-  side gutters or distorted content. Section-to-section scroll snapping lands
-  each panel cleanly.
+  along the free axis. The two hero panes and edge controls absorb that room
+  fluidly. Section 2 remains an edge-to-edge three-column track with 10px
+  panel insets and 10px card gutters; the card surfaces grow with the columns
+  while their pixel-locked illustrations stay centred and undistorted.
+  Section-to-section scroll snapping lands each panel cleanly.
 * **≤ 900px** — the two panels reflow into a single column at readable type
   sizes. The three feature cards are pixel-locked compositions, so each is
   scaled as a unit rather than pulled apart.
@@ -108,7 +109,9 @@ at 60fps and fitted, rather than eyeballed:
 | section 1 scene | scale 1 → 0.961 | 0–800ms | `1 − 0.039·u^0.62`, fit rms 0.001 |
 | nav pills | x 96.76px → section 2's centred x | 17–750ms | `cubic-bezier(.42,.09,0,1)`, fit rmse 0.002 |
 | section 2 heading | opacity 0 → 1 | 750–1333ms | ease-out, p 2.2 |
-| section 2 cards | opacity 0 → 1 | 770–1670ms | linear |
+| security card | surface → illustration | 1060–1900ms | ease-out, p 2.2 |
+| transfer card | surface → globe | 1390–2350ms | ease-out, p 2.2 |
+| staking card | surface → rings → card → badge/tag | 1900–3400ms | ease-out, p 2.2 |
 
 The logo and the "Get Early Access" button never move: the recording carries
 one persistent header through the transition, which is why section 2's bar is
@@ -117,7 +120,9 @@ mark both scenes are invisible and the two panels are pixel-identical, so the
 scroll is moved between slots there and the cut cannot be seen. The
 transition is desktop-only and is skipped under `prefers-reduced-motion`.
 
-Verified against the recording (46 transition frames, 31 entrance frames):
+The original handoff track remains verified against the recording (46
+transition frames). The new Section 2 descendant sequence was mapped from the
+recording's 24fps entrance frames and is kept on independent progress tracks:
 
 | measurement | mean error | max error |
 | --- | --- | --- |
@@ -125,7 +130,37 @@ Verified against the recording (46 transition frames, 31 entrance frames):
 | section 1 opacity | −0.007 | 0.028 |
 | section 1 vertical position | −1.0px | 10.5px |
 | section 2 heading opacity | +0.003 | 0.056 |
-| section 2 card opacity | −0.004 | 0.079 |
+
+## Section 1 entrance
+
+Section 1 now reproduces the reference entrance as independent descendant
+tracks, so the completed section-to-section transition can continue to move
+`.hero__scene` without competing transforms:
+
+* the three display lines reveal through blur at 360ms, 460ms and 560ms;
+* supporting copy and controls follow between 780ms and 1340ms;
+* the Visa card fades/scales from 48% to full size, turns linearly through the
+  reference's edge-on 270° pose, then completes 360° and rests face-on;
+* the right pane uses the supplied five-second animated mountain clip, cropped
+  to its square picture area and optimized to a 1080px H.264 web asset. A WebP
+  poster is present for startup and playback fallback.
+
+The entrance is desktop-only and respects `prefers-reduced-motion`; in that
+mode the static final artwork is shown and the background video is paused.
+
+## Section 2 entrance
+
+The Section 1→2 handoff remains unchanged through its 800ms scene boundary.
+After that boundary, Section 2 uses separately measured, reversible tracks:
+the heading resolves first, then the security surface and key, then the
+transfer surface and globe, and finally the staking surface, rings, card,
+badge and yield tag. The supplied five-second globe clip starts with the
+transfer artwork and loops with the reference's transfer node: the node fades
+in beside “Any wallet”, follows a measured SVG-compatible circular motion path
+over the globe, fades beside “Bank account”, and resets invisibly for the next
+pass. The landscape
+media window uses `object-fit: contain` so the square source retains the
+reference's complete globe crown instead of being enlarged and top-clipped.
 
 ## Interactions
 
@@ -136,4 +171,4 @@ Only what the file represents:
 * the showcase dots have a selected and an unselected state;
 * focus-visible outlines for keyboard use.
 
-No decorative animation was added.
+All motion is scoped to the two supplied reference sequences.
