@@ -28,6 +28,12 @@
     if (width > MOBILE_BREAKPOINT) {
       var scale = Math.min(1, width / DESIGN_WIDTH);
       stage.style.setProperty('--scale', scale);
+
+      /* Release the height before measuring: the scale is only a paint-time
+         transform, so the wrapper has to be told how tall the result is, and
+         that measurement must never be taken while the previous answer is
+         still constraining the stage. */
+      viewport.style.height = 'auto';
       viewport.style.height = stage.offsetHeight * scale + 'px';
     } else {
       stage.style.removeProperty('--scale');
