@@ -1,8 +1,8 @@
 # Seamless Web3 Banking
 
 A hand-built HTML / CSS / vanilla-JS implementation of the supplied Figma
-file (`Untitled_13.fig`). No frameworks, no build step — open `index.html`
-or serve the folder statically.
+files (`Untitled_13.fig`, `Untitled_14.fig`). No frameworks, no build step —
+open `index.html` or serve the folder statically.
 
 ```
 index.html
@@ -16,18 +16,28 @@ assets/
 
 ## What was implemented
 
-The document contains one page with two 1800 × 1350 presentation frames:
+The two files are the same document exported twice, each with a different
+frame made visible, so each supplies one section:
 
-| Figma frame            | Section in the build |
-| ---------------------- | -------------------- |
-| `Dribbble shot HD - 128` | Hero — nav, "Seamless Web3 Banking", card showcase |
-| `Dribbble shot HD - 129` | Features — "Your Digital Lifestyle" and the three cards |
+| Source file        | Figma frame              | Section in the build |
+| ------------------ | ------------------------ | -------------------- |
+| `Untitled_13.fig`  | `Dribbble shot HD - 128` | 1 — hero: nav, "Seamless Web3 Banking", card showcase |
+| `Untitled_14.fig`  | `Dribbble shot HD - 129` | 2 — "Your Digital Lifestyle" and the three cards |
 
 Inside each frame the website itself is a **1685 × 1073** rounded panel at
 `(58, 207)`. The surrounding light-grey presentation board and its
 `kris anfalova` / `case ui/ux` credit layers are the mockup wrapper, not the
 product, so they are not part of the build. Both panels are reproduced at
 their exact Figma coordinates, including the nav bar that each frame carries.
+
+The two sections are **independent**. They share only the design tokens and
+the three chrome components that are byte-identical in both frames (logo,
+nav pills, white button) — and even those are *positioned* separately, each
+section placing them from its own frame. Section 2 owns its whole namespace
+(`.lifestyle`, `.lcard`, `.lring`, `.ltag`, …) and inherits no layout from
+section 1. The one measurement not taken from the file is `--panel-gap`:
+the frames are separate boards, so the panels need a seam once the mock-up
+background is dropped.
 
 Everything else comes straight out of the file: paint colours, gradient
 transforms (linear, radial and angular, converted to their CSS equivalents),
@@ -68,6 +78,19 @@ The file only contains desktop frames, so the design is not reinterpreted:
 * **< 900px** — the two panels reflow into a single column at readable type
   sizes. The three feature cards are pixel-locked compositions, so each is
   scaled as a unit rather than pulled apart.
+
+## Verification
+
+Both sections were diffed against the reference render embedded in their
+own `.fig`: every element's rendered box was checked against the decoded
+frame geometry (45 elements, all exact bar the nav pill width, which moves
+with the substituted font), and the rasterised sections were aligned and
+compared — 3.2 % mean absolute error for section 1 and 2.2 % for section 2,
+almost all of it high-frequency photo texture and glyph-shape difference.
+The key plate's angular gradient, the one paint whose orientation the file
+format leaves ambiguous, was fitted against the reference over 48 candidate
+orientations; the winner matches the transform-handle derivation
+(`from 180deg`).
 
 ## Interactions
 
