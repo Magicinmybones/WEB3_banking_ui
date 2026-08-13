@@ -37,7 +37,7 @@
   }
 
   function scaleFeatureCards() {
-    var slots = document.querySelectorAll('.fcard-slot');
+    var slots = document.querySelectorAll('.lcard-slot');
 
     for (var i = 0; i < slots.length; i++) {
       var slot = slots[i];

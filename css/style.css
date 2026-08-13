@@ -1,11 +1,15 @@
 /* ==========================================================================
    Seamless Web3 Banking
-   Implementation of the supplied Figma frames
-   "Dribbble shot HD - 128" (hero) and "Dribbble shot HD - 129" (features).
 
-   Every measurement below is taken from the Figma document. The design is a
-   fixed 1685 x 1073 canvas per section, so the desktop build reproduces those
-   coordinates literally and is scaled proportionally to the viewport.
+   Section 1 is the Figma frame "Dribbble shot HD - 128" (Untitled_13.fig).
+   Section 2 is the Figma frame "Dribbble shot HD - 129" (Untitled_14.fig).
+
+   Each frame places the website on a fixed 1685 x 1073 rounded panel, so the
+   desktop build reproduces those coordinates literally and scales the whole
+   artboard proportionally to the viewport. The two sections are independent:
+   they share only the design tokens and the three chrome components that
+   appear identically in both frames, and each section positions everything
+   itself from its own frame data.
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -93,8 +97,12 @@
   --r-keyplate-inner: 30px;
   --r-tag: 29px;
 
-  /* the two card surface gradients repeat across the feature cards */
+  /* the surface gradient shared by the three section 2 cards */
   --surface-card: linear-gradient(0deg, var(--card-bottom) 0%, var(--card-top) 100%);
+
+  /* the only measurement not taken from the file: the two 1685x1073 panels
+     are separate frames, so they need a seam once the mock-up board is gone */
+  --panel-gap: 20px;
 }
 
 /* --------------------------------------------------------------------------
@@ -149,9 +157,6 @@ button { font: inherit; color: inherit; }
   transform-origin: top center;
 }
 
-/* --------------------------------------------------------------------------
-   5. Panels
-   -------------------------------------------------------------------------- */
 .panel {
   position: relative;
   width: var(--design-width);
@@ -160,15 +165,16 @@ button { font: inherit; color: inherit; }
   background: var(--panel-bg);
 }
 
-/* --------------------------------------------------------------------------
-   6. Shared components
-   -------------------------------------------------------------------------- */
+.panel + .panel { margin-top: var(--panel-gap); }
 
-/* --- top bar (its three items are placed at their Figma coordinates) ------ */
+/* --------------------------------------------------------------------------
+   5. Chrome components
+   The logo, the nav pills and the white button are byte-identical in both
+   frames, so their appearance is defined once. Their position is not: each
+   section places them from its own frame.
+   -------------------------------------------------------------------------- */
 .logo {
   position: absolute;
-  left: 39px;
-  top: 37px;
   width: 46.92px;
   height: 46px;
 }
@@ -176,8 +182,6 @@ button { font: inherit; color: inherit; }
 
 .navlinks {
   position: absolute;
-  left: 96.76px;
-  top: 37px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -203,80 +207,32 @@ button { font: inherit; color: inherit; }
 .pill:hover,
 .pill.is-active { background: rgba(255, 255, 255, 0.1); }
 
-/* --- white buttons ------------------------------------------------------- */
 .btn-white {
+  position: absolute;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--white);
-  color: var(--ink);
-  font-family: var(--font-display);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-}
-
-.btn-white--sm {
-  position: absolute;
-  left: 1494px;
-  top: 37px;
   width: 151px;
   height: 46px;
   padding: 16px;
   border-radius: var(--r-pill);
-  font-size: 16px;
-  line-height: 14px;
-}
-
-/* --- tags / badges ------------------------------------------------------- */
-.tag {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 34px;
-  padding: 0 14px;
-  border: 1px solid var(--hairline);
-  border-radius: var(--r-tag);
-  background: var(--tag-fill);
-  /* the 80% opacity sits on the label in Figma, not on the container */
-  color: rgba(255, 255, 255, 0.8);
-  font-family: var(--font-body);
-  font-size: 14px;
-  line-height: 18px;
-  letter-spacing: -0.02em;
-  white-space: nowrap;
-}
-
-/* --- decorative stroke-only ellipses ------------------------------------- */
-.ring {
-  position: absolute;
-  overflow: visible;
-  pointer-events: none;
-}
-
-/* --- feature card copy --------------------------------------------------- */
-.fcard__title {
+  background: var(--white);
+  color: var(--ink);
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 32px;
-  line-height: 29px;
-  letter-spacing: -0.05em;
-  text-transform: uppercase;
-  text-align: center;
-}
-
-.fcard__desc {
-  font-family: var(--font-body);
-  font-size: 18px;
-  line-height: 23px;
+  font-size: 16px;
+  line-height: 14px;
   letter-spacing: -0.02em;
-  text-align: center;
-  opacity: 0.8;
 }
 
 /* ==========================================================================
-   7. HERO PANEL  (Figma frame "Dribbble shot HD - 128")
+   6. SECTION 1 - hero
+   Figma frame "Dribbble shot HD - 128", panel at (58, 207), 1685 x 1073.
    ========================================================================== */
+.hero .logo { left: 39px; top: 37px; }
+.hero .navlinks { left: 96.76px; top: 37px; }
+.hero .btn-white { left: 1494px; top: 37px; }
+
 .hero__pane {
   position: absolute;
   top: 10px;
@@ -327,6 +283,8 @@ button { font: inherit; color: inherit; }
   height: 423px;
   border-radius: var(--r-visa);
 }
+
+.showcase__copy { display: contents; }
 
 .showcase__title {
   position: absolute;
@@ -381,8 +339,8 @@ button { font: inherit; color: inherit; }
 
 /* --- hero copy ----------------------------------------------------------- */
 /* The substituted display face carries a slightly taller ascent than
-   TT Hoves, so the two largest headings are nudged down by the difference
-   to land their first baseline exactly where Figma puts it. */
+   TT Hoves, so the largest headings are nudged down by the difference to
+   land their first baseline exactly where Figma puts it. */
 .hero__title {
   position: absolute;
   left: 39px;
@@ -458,15 +416,16 @@ button { font: inherit; color: inherit; }
 }
 
 /* ==========================================================================
-   8. FEATURES PANEL  (Figma frame "Dribbble shot HD - 129")
+   7. SECTION 2 - your digital lifestyle
+   Figma frame "Dribbble shot HD - 129", panel at (58, 207), 1685 x 1073.
+   Coordinates below are panel-relative; card children are relative to their
+   own card group, whose origin is given above each block.
    ========================================================================== */
-.topbar--centered .logo,
-.topbar--centered .navlinks,
-.topbar--centered .btn-white--sm { top: 23px; }
+.lifestyle .logo { left: 39px; top: 23px; }
+.lifestyle .navlinks { left: 700px; top: 23px; }
+.lifestyle .btn-white { left: 1494px; top: 23px; }
 
-.topbar--centered .navlinks { left: 700px; }
-
-.features__title {
+.lifestyle__title {
   position: absolute;
   left: 549px;
   top: 195px;
@@ -482,39 +441,77 @@ button { font: inherit; color: inherit; }
   text-align: center;
 }
 
-/* The grid and slot wrappers only exist for the single-column fallback; on
-   desktop they generate no box so the cards keep their Figma coordinates. */
-.features__grid,
-.fcard-slot,
-.showcase__copy { display: contents; }
+/* --- pieces every card in this section is built from --------------------- */
+.lifestyle__grid,
+.lcard-slot { display: contents; }
 
-.fcard { position: absolute; }
+.lcard { position: absolute; }
 
-.fcard__body {
+.lcard__surface {
   position: absolute;
   border-radius: var(--r-pane);
   background: var(--surface-card);
 }
 
-.fcard__text { position: absolute; width: 327.2px; height: 126.05px; }
-
-.fcard__desc {
+.lcard__title {
   position: absolute;
-  left: 0;
-  top: 80.05px;
-  width: 327.19px;
-  height: 46px;
+  height: 58px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 32px;
+  line-height: 29px;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+  text-align: center;
 }
 
-/* --- card 1: non-custodial security -------------------------------------- */
-.fcard--security {
+.lcard__desc {
+  position: absolute;
+  width: 327.19px;
+  height: 46px;
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 23px;
+  letter-spacing: -0.02em;
+  text-align: center;
+  opacity: 0.8;
+}
+
+/* stroke-only ellipses that ring the card artwork */
+.lring {
+  position: absolute;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* 34px pill labels: 1px inside stroke, 5% white fill, 80% white label */
+.ltag {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-tag);
+  background: var(--tag-fill);
+  color: rgba(255, 255, 255, 0.8);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 18px;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+/* --- card 1: non-custodial security --- group origin (10, 221) ----------- */
+.lcard--security {
   left: 10px;
   top: 221px;
   width: 547px;
   height: 843px;
 }
 
-.fcard--security .fcard__body {
+.lcard--security .lcard__surface {
   left: 0;
   top: 241px;
   width: 547px;
@@ -525,9 +522,9 @@ button { font: inherit; color: inherit; }
     var(--surface-card);
 }
 
-.ring--security { left: 34px; top: 0; width: 481px; height: 481px; }
+.lring--security { left: 34px; top: 0; width: 481px; height: 481px; }
 
-.tag--security { left: 210px; top: 304px; width: 127px; }
+.ltag--soa { left: 210px; top: 304px; width: 127px; }
 
 /* 1px inside stroke -> transparent border painted by a border-box gradient */
 .keyplate {
@@ -538,18 +535,19 @@ button { font: inherit; color: inherit; }
   height: 189px;
   border: 1px solid transparent;
   border-radius: var(--r-keyplate);
+  /* Figma's angular gradient transform puts its 0 handle at 6 o'clock and
+     sweeps clockwise, hence `from 180deg`. */
   background-image:
-    conic-gradient(from 0deg at 50% 50%, #8b8b8c 133.14deg, #171818 313.95deg),
+    conic-gradient(from 180deg at 50% 50%, #8b8b8c 133.14deg, #171818 313.95deg),
     linear-gradient(180deg, #000000 0%, #666666 100%);
   background-origin: border-box;
   background-clip: padding-box, border-box;
 }
 
-/* Figma places this at 16,17 - offset by the 1px border of .keyplate */
-.keyplate__inner {
+.keyplate__well {
   position: absolute;
-  left: 15px;
-  top: 16px;
+  left: 196px;
+  top: 386px;
   width: 156px;
   height: 156px;
   border: 9px solid transparent;
@@ -566,7 +564,7 @@ button { font: inherit; color: inherit; }
   backdrop-filter: blur(59.45px);
 }
 
-.keyplate__icon {
+.keyplate__key {
   position: absolute;
   left: 237px;
   top: 427px;
@@ -576,30 +574,23 @@ button { font: inherit; color: inherit; }
   mix-blend-mode: soft-light;
 }
 
-.fcard--security .fcard__text { left: 106px; top: 652px; }
-.fcard--security .fcard__title {
-  position: absolute;
-  left: 11px;
-  top: 0;
-  width: 305px;
-  height: 58px;
-}
+.lcard--security .lcard__title { left: 117px; top: 652px; width: 305px; }
+.lcard--security .lcard__desc { left: 106px; top: 732.05px; }
 
-/* --- card 2: lightning transfers ----------------------------------------- */
-.fcard--transfers {
+/* --- card 2: lightning transfers --- group origin (568, 461) ------------- */
+.lcard--transfers {
   left: 568px;
   top: 461px;
   width: 549px;
   height: 602px;
+  isolation: isolate;
 }
 
-.fcard--transfers .fcard__body {
+.lcard--transfers .lcard__surface {
   left: 0;
   top: 0;
   width: 548px;
   height: 602px;
-  isolation: isolate;
-  overflow: hidden;
 }
 
 .globe {
@@ -623,9 +614,9 @@ button { font: inherit; color: inherit; }
     rgba(25, 26, 26, 0) 11.26%, #121313 67.07%);
 }
 
-.ring--transfers { left: 25px; top: 81px; width: 481px; height: 481px; }
+.lring--transfers { left: 25px; top: 81px; width: 481px; height: 481px; }
 
-.tag--wallet {
+.ltag--wallet {
   left: 44px;
   top: 123px;
   width: 90px;
@@ -633,7 +624,7 @@ button { font: inherit; color: inherit; }
   backdrop-filter: blur(17.95px);
 }
 
-.tag--bank {
+.ltag--bank {
   left: 366px;
   top: 94px;
   width: 114px;
@@ -651,24 +642,18 @@ button { font: inherit; color: inherit; }
   background: var(--white);
 }
 
-.fcard--transfers .fcard__text { left: 106px; top: 413px; }
-.fcard--transfers .fcard__title {
-  position: absolute;
-  left: 68px;
-  top: 0;
-  width: 192px;
-  height: 58px;
-}
+.lcard--transfers .lcard__title { left: 174px; top: 413px; width: 192px; }
+.lcard--transfers .lcard__desc { left: 106px; top: 493.05px; }
 
-/* --- card 3: automated staking ------------------------------------------- */
-.fcard--staking {
+/* --- card 3: automated staking --- group origin (1127, 220) -------------- */
+.lcard--staking {
   left: 1127px;
   top: 220px;
   width: 548px;
   height: 843px;
 }
 
-.fcard--staking .fcard__body {
+.lcard--staking .lcard__surface {
   left: 0;
   top: 241px;
   width: 548px;
@@ -682,7 +667,7 @@ button { font: inherit; color: inherit; }
 }
 
 /* Figma "noise" effect: monotone, 1px grain, colour #000 25%, opacity 15% */
-.fcard--staking .fcard__body::after {
+.lcard--staking .lcard__surface::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -691,20 +676,12 @@ button { font: inherit; color: inherit; }
   pointer-events: none;
 }
 
-.orbit {
-  position: absolute;
-  left: 22px;
-  top: 0;
-  width: 505px;
-  height: 645px;
-}
-
-.ring--outer { left: 0; top: 0; width: 505px; height: 505px; }
-.ring--inner { left: 111px; top: 118px; width: 265px; height: 265px; }
+.lring--orbit-outer { left: 22px; top: 0; width: 505px; height: 505px; }
+.lring--orbit-inner { left: 133px; top: 118px; width: 265px; height: 265px; }
 
 .orbit__card {
   position: absolute;
-  left: 76.3px;
+  left: 98.3px;
   top: 381px;
   width: 346px;
   height: 264px;
@@ -712,7 +689,7 @@ button { font: inherit; color: inherit; }
 
 .orbit__badge {
   position: absolute;
-  left: 198px;
+  left: 220px;
   top: 335px;
   width: 103px;
   height: 103px;
@@ -726,8 +703,8 @@ button { font: inherit; color: inherit; }
 
 .orbit__badge-inner {
   position: absolute;
-  left: 9px;
-  top: 9px;
+  left: 230px;
+  top: 345px;
   width: 82px;
   height: 82px;
   border: 1px solid var(--glass-line);
@@ -737,26 +714,19 @@ button { font: inherit; color: inherit; }
 
 .orbit__bolt {
   position: absolute;
-  left: 34px;
-  top: 28px;
+  left: 255px;
+  top: 364px;
   width: 38px;
   height: 38.52px;
 }
 
-.tag--yield { left: 200px; top: 279px; width: 103px; }
+.ltag--yield { left: 222px; top: 279px; width: 103px; }
 
-.fcard--staking .fcard__title {
-  position: absolute;
-  left: 127px;
-  top: 653px;
-  width: 286px;
-  height: 58px;
-}
-
-.fcard--staking .fcard__desc { left: 106px; top: 733.05px; }
+.lcard--staking .lcard__title { left: 127px; top: 653px; width: 286px; }
+.lcard--staking .lcard__desc { left: 106px; top: 733.05px; }
 
 /* ==========================================================================
-   9. Small viewports
+   8. Small viewports
    The Figma file only contains desktop frames, so the layout is not
    redesigned - it reflows into a single column at the same type scale,
    keeping every element, colour, radius and asset from the design.
@@ -777,7 +747,7 @@ button { font: inherit; color: inherit; }
     overflow: hidden;
   }
 
-  /* --- topbar --------------------------------------------------------- */
+  /* --- chrome ---------------------------------------------------------- */
   .topbar {
     position: relative;
     display: flex;
@@ -787,20 +757,16 @@ button { font: inherit; color: inherit; }
     margin-bottom: 40px;
   }
 
-  .logo,
-  .navlinks,
-  .btn-white--sm,
-  .topbar--centered .logo,
-  .topbar--centered .navlinks,
-  .topbar--centered .btn-white--sm {
+  .hero .logo, .hero .navlinks, .hero .btn-white,
+  .lifestyle .logo, .lifestyle .navlinks, .lifestyle .btn-white {
     position: static;
   }
 
   .navlinks { flex: 1 1 auto; justify-content: center; gap: 4px; }
   .pill { padding: 12px; font-size: 14px; }
-  .btn-white--sm { width: auto; padding: 14px 18px; font-size: 14px; }
+  .btn-white { width: auto; padding: 14px 18px; font-size: 14px; }
 
-  /* --- hero ----------------------------------------------------------- */
+  /* --- section 1 -------------------------------------------------------- */
   .hero { display: flex; flex-direction: column; }
   .hero__pane--left { display: none; }
 
@@ -880,8 +846,8 @@ button { font: inherit; color: inherit; }
 
   .dots { left: 50%; top: auto; bottom: 6%; transform: translateX(-50%); }
 
-  /* --- features ------------------------------------------------------- */
-  .features__title {
+  /* --- section 2 -------------------------------------------------------- */
+  .lifestyle__title {
     position: relative;
     left: auto;
     top: auto;
@@ -893,17 +859,17 @@ button { font: inherit; color: inherit; }
     transform: none;
   }
 
-  /* Each feature card is a pixel-locked composition, so instead of pulling it
-     apart it is scaled down as a whole to the width of the single column.
+  /* Each card is a pixel-locked composition, so instead of pulling it apart
+     it is scaled down as a whole to the width of the single column.
      js/script.js supplies --card-scale and the slot height. */
-  .features__grid {
+  .lifestyle__grid {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 20px;
   }
 
-  .fcard-slot {
+  .lcard-slot {
     display: block;
     position: relative;
     width: 100%;
@@ -911,7 +877,7 @@ button { font: inherit; color: inherit; }
     overflow: hidden;
   }
 
-  .fcard {
+  .lcard {
     left: 0;
     top: 0;
     transform: translateY(var(--crop-shift, 0px)) scale(var(--card-scale, 1));
@@ -921,8 +887,8 @@ button { font: inherit; color: inherit; }
   /* The top 241px of these two cards sit above their surface and hold only
      the transparent half of the decorative rings, so the empty band is
      trimmed rather than carried into the single-column stack. */
-  .fcard--security,
-  .fcard--staking { --crop-top: 241; }
+  .lcard--security,
+  .lcard--staking { --crop-top: 241; }
 }
 
 @media (prefers-reduced-motion: reduce) {
