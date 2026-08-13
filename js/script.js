@@ -10,7 +10,9 @@
 
   var DESIGN_WIDTH = 1685;
   var DESIGN_HEIGHT = 1073;
-  var DESKTOP_QUERY = '(min-width: 901px)';
+  /* The scaled artboard runs down to 1200px, where its type stops holding up
+     and the tablet architecture takes over - see section 8 of the stylesheet. */
+  var DESKTOP_QUERY = '(min-width: 1200px)';
 
   var stage = document.getElementById('stage');
 
@@ -282,7 +284,83 @@
   });
 
   /* ---------------------------------------------------------------------
-     4. Showcase dots - the Figma frame defines a selected and an unselected
+     4. Tablet menu
+     Below the artboard breakpoint the nav row folds into a burger. What it
+     opens is the very same wrapper the links and the button already live in,
+     so no navigation markup is duplicated - only its presentation changes,
+     and it is CSS that decides when that presentation applies.
+     --------------------------------------------------------------------- */
+  var menus = [];
+
+  function setMenu(entry, open) {
+    entry.menu.classList.toggle('is-open', open);
+    entry.burger.setAttribute('aria-expanded', String(open));
+    entry.burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  }
+
+  function closeMenus(restoreFocus) {
+    menus.forEach(function (entry) {
+      if (!entry.menu.classList.contains('is-open')) return;
+      setMenu(entry, false);
+      if (restoreFocus) entry.burger.focus();
+    });
+  }
+
+  function openMenu(entry) {
+    menus.forEach(function (other) {
+      if (other !== entry) setMenu(other, false);
+    });
+    setMenu(entry, true);
+
+    /* on the next frame: the surface is out of `visibility: hidden` by then,
+       and a pointer-driven focus on the burger has already settled */
+    var first = entry.menu.querySelector('a');
+    if (first) requestAnimationFrame(function () { first.focus(); });
+  }
+
+  Array.prototype.forEach.call(
+    document.querySelectorAll('.navburger'),
+    function (burger) {
+      var menu = document.getElementById(burger.getAttribute('aria-controls'));
+      if (!menu) return;
+
+      var entry = { burger: burger, menu: menu };
+      menus.push(entry);
+
+      burger.addEventListener('click', function () {
+        if (menu.classList.contains('is-open')) closeMenus(false);
+        else openMenu(entry);
+      });
+
+      /* picking a destination closes the menu behind it */
+      menu.addEventListener('click', function (e) {
+        if (e.target.closest('a')) closeMenus(false);
+      });
+    }
+  );
+
+  document.addEventListener('click', function (e) {
+    for (var i = 0; i < menus.length; i++) {
+      if (menus[i].menu.contains(e.target) ||
+          menus[i].burger.contains(e.target)) return;
+    }
+    closeMenus(false);
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeMenus(true);
+  });
+
+  /* leaving the tablet band puts the links back in the bar themselves */
+  var tabletQuery = window.matchMedia('(max-width: 1199.98px)');
+  function onBandChange() {
+    if (!tabletQuery.matches) closeMenus(false);
+  }
+  if (tabletQuery.addEventListener) tabletQuery.addEventListener('change', onBandChange);
+  else if (tabletQuery.addListener) tabletQuery.addListener(onBandChange);
+
+  /* ---------------------------------------------------------------------
+     5. Showcase dots - the Figma frame defines a selected and an unselected
         dot, so selection is the only behaviour wired up here.
      --------------------------------------------------------------------- */
   var dots = Array.prototype.slice.call(document.querySelectorAll('.dot'));

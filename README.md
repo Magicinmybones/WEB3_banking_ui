@@ -72,15 +72,78 @@ lands where Figma puts it.
 The file only contains desktop frames, so the desktop design is preserved as
 a proportional artboard:
 
-* **≥ 901px** — each section occupies one dynamic viewport-sized slot. The
+* **≥ 1200px** — each section occupies one dynamic viewport-sized slot. The
   artwork scales uniformly from the limiting axis, then the panel expands
   along the free axis. The two hero panes, edge controls and feature-card
   spacing absorb that room fluidly, so the design fills the viewport without
   side gutters or distorted content. Section-to-section scroll snapping lands
   each panel cleanly.
-* **≤ 900px** — the two panels reflow into a single column at readable type
+* **600 – 1199px** — the tablet architecture, below.
+* **≤ 599px** — the two panels reflow into a single column at readable type
   sizes. The three feature cards are pixel-locked compositions, so each is
   scaled as a unit rather than pulled apart.
+
+### Where the tablet breakpoint comes from
+
+A uniformly scaled artboard never collides or overflows as the viewport
+narrows — it just renders smaller — so the only thing that can fail is
+legibility, and that is what the breakpoint was measured against. Rendered
+type at each width:
+
+| viewport | scale | lede | card copy | nav pill | tag / eyebrow |
+| --- | --- | --- | --- | --- | --- |
+| 1440 × 900 | 0.839 | 18.5 | 15.1 | 13.4 | 11.7 |
+| 1280 × 800 | 0.746 | 16.4 | 13.4 | 11.9 | 10.4 |
+| 1200 × 800 | 0.712 | 15.7 | 12.8 | 11.4 | 10.0 |
+| 1180 × 820 | 0.700 | 15.4 | 12.6 | 11.2 | 9.8 |
+| 1024 × 768 | 0.608 | 13.4 | 11.0 | 9.7 | 8.5 |
+
+1200px is the last width where the body copy still holds the 13px range and
+the small labels hold 10px, so the artboard keeps its own architecture down to
+there — well past the conventional 1024px tablet breakpoint — and hands over
+only where it would start shrinking the design instead of laying it out. The
+height axis is deliberately left out of the trigger, so no window that renders
+the desktop composition today changes architecture.
+
+### The tablet architecture
+
+Below 1200px the artboard stops scaling and the same elements are re-composed
+at their native type sizes. Nothing is removed and no component is redrawn.
+
+* **Hero.** The two panes stay side by side whenever the viewport is at least
+  as wide as it is tall — keying the switch to the shape rather than to a
+  device width keeps every landscape tablet on the frame's own split and gives
+  portrait ones the stacked composition, with no jump at an arbitrary width.
+  The copy that floats over the left pane on desktop keeps that pane as its
+  surface: the two share one grid cell.
+* **Showcase.** Becomes a four-row grid (eyebrow, card, copy, dots), so the
+  pieces cannot collide the way the desktop percentages did once the pane
+  changed shape. The card is sized by the row it is given and is never scaled
+  past its own 301 × 423 render, so it stays sharp; its aspect ratio holds to
+  four decimal places at every width.
+* **Feature cards.** Two across while a column can still carry a card at a
+  readable scale (≥ 940px, where the 18px description is still ~14px); the two
+  tall cards pair on the first row and the short one centres below at exactly
+  one column's width, so all three keep the same scale. Below that the grid
+  goes to one column and the cards run at their native size — they are 1×
+  exports, so they are never upscaled.
+* **Navigation.** The nav row folds into a burger; see below.
+* **Margins** scale with the viewport (`clamp`) instead of holding the desktop
+  values or collapsing to the edge.
+
+The section transition and scroll snapping belong to the scaled artboard and
+are not used below 1200px, where the page simply flows.
+
+## Verifying the responsive work
+
+Renders were diffed pixel by pixel against the same commit's output at
+1200 × 800/900, 1280 × 800, 1366 × 768, 1440 × 900, 1600 × 1000, 1920 × 1080
+and at 375 × 812, 500 × 900, 599 × 900: **zero differing pixels**, so neither
+the desktop artboard nor the small-viewport reflow moved. Thirty viewport
+sizes from 1440px down to 600px were then checked for horizontal overflow,
+elements escaping their panel, internal scrollbars, collisions between the
+showcase pieces and between the feature cards, card aspect distortion, and
+that the burger and the nav row are never both present — all clean.
 
 ## Verification
 
@@ -137,3 +200,23 @@ Only what the file represents:
 * focus-visible outlines for keyboard use.
 
 No decorative animation was added.
+
+## Tablet menu
+
+The one thing the frames do not contain is a tablet nav. When the bar folds,
+the logo stays exactly as it is and the links and the "Get Early Access"
+button move into a burger — they are not duplicated: both live in a wrapper
+that is `display: contents` at every other width, so each frame keeps placing
+them from its own coordinates and the desktop DOM is untouched.
+
+The surface it opens is built from paints the page already uses — the section
+2 card gradient, the 10% hairline, the 26px pane radius, and the staking
+badge's shadow and 27.3px blur — and it holds the unchanged pill and button
+components, only stacked. The burger's three hairlines are the panel's own 1px
+stroke weight and cross into a close icon while it is open.
+
+It opens on click, closes on Escape (returning focus to the burger), on a
+click outside, and on choosing a destination; `aria-expanded` and
+`aria-controls` are wired, the first item takes focus on open, and the closed
+surface is `visibility: hidden`, so it is out of the tab order. Only CSS
+decides when the burger applies.
