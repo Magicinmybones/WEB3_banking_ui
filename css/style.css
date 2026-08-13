@@ -100,8 +100,7 @@
   /* the surface gradient shared by the three section 2 cards */
   --surface-card: linear-gradient(0deg, var(--card-bottom) 0%, var(--card-top) 100%);
 
-  /* the only measurement not taken from the file: the two 1685x1073 panels
-     are separate frames, so they need a seam once the mock-up board is gone */
+  /* mobile reflow keeps a small seam between the two independent frames */
   --panel-gap: 20px;
 }
 
@@ -139,36 +138,45 @@ button { font: inherit; color: inherit; }
 }
 
 /* --------------------------------------------------------------------------
-   4. Scaling stage
-   The artboard is a fixed 1685px canvas. Above that width it renders 1:1;
-   below it, the whole stage is scaled so proportions stay identical to Figma.
-   `--scale` and the wrapper height are maintained in js/script.js.
+   4. Viewport-aware artboards
+   Each desktop section owns one viewport-sized slot. The Figma coordinate
+   system scales uniformly from its limiting axis, while the panel expands
+   along the free axis. Edge-aligned chrome, panes and feature cards then
+   absorb that extra room as fluid spacing, keeping the artwork undistorted
+   and the section flush with every viewport edge.
    -------------------------------------------------------------------------- */
-.viewport {
-  display: flex;
-  justify-content: center;
-  /* the stage must keep its own layout height: stretching it to the height
-     the script sets would feed that value back into the next measurement */
-  align-items: flex-start;
-  overflow: hidden;
+.viewport,
+.stage {
+  width: 100%;
 }
 
-.stage {
-  width: var(--design-width);
-  flex: 0 0 auto;
-  transform: scale(var(--scale, 1));
-  transform-origin: top center;
+.viewport { overflow-x: clip; }
+
+.panel-slot {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: clip;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
 }
 
 .panel {
-  position: relative;
-  width: var(--design-width);
-  height: var(--design-height);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--layout-width, var(--design-width));
+  height: var(--layout-height, var(--design-height));
   border-radius: var(--r-panel);
   background: var(--panel-bg);
+  transform: translate(-50%, -50%) scale(var(--scale, 1));
+  transform-origin: center;
 }
 
-.panel + .panel { margin-top: var(--panel-gap); }
+@media (min-width: 901px) {
+  html { scroll-snap-type: y mandatory; }
+}
 
 /* --------------------------------------------------------------------------
    5. Chrome components
@@ -234,13 +242,13 @@ button { font: inherit; color: inherit; }
    ========================================================================== */
 .hero .logo { left: 39px; top: 37px; }
 .hero .navlinks { left: 96.76px; top: 37px; }
-.hero .btn-white { left: 1494px; top: 37px; }
+.hero .btn-white { left: auto; right: 40px; top: 37px; }
 
 .hero__pane {
   position: absolute;
   top: 10px;
-  width: 827px;
-  height: 1053px;
+  width: calc((100% - 31px) / 2);
+  height: calc(100% - 20px);
   border-radius: var(--r-pane);
 }
 
@@ -252,7 +260,8 @@ button { font: inherit; color: inherit; }
 }
 
 .hero__pane--right {
-  left: 848px;
+  left: auto;
+  right: 10px;
   overflow: hidden;
 }
 
@@ -280,7 +289,7 @@ button { font: inherit; color: inherit; }
 
 .showcase__card {
   position: absolute;
-  left: 263px;
+  left: calc(50% - 150.5px);
   top: 269px;
   width: 301px;
   height: 423px;
@@ -291,7 +300,7 @@ button { font: inherit; color: inherit; }
 
 .showcase__title {
   position: absolute;
-  left: 259px;
+  left: calc(50% - 154.5px);
   top: 745px;
   width: 286px;
   height: 72px;
@@ -306,7 +315,7 @@ button { font: inherit; color: inherit; }
 
 .showcase__sub {
   position: absolute;
-  left: 264px;
+  left: calc(50% - 149.5px);
   top: 836.05px;
   width: 275.42px;
   height: 46px;
@@ -319,8 +328,9 @@ button { font: inherit; color: inherit; }
 
 .dots {
   position: absolute;
-  left: 395px;
-  top: 998px;
+  left: calc(50% - 18px);
+  top: auto;
+  bottom: 49px;
   display: flex;
   align-items: center;
   gap: 9px;
@@ -376,7 +386,8 @@ button { font: inherit; color: inherit; }
 .cta {
   position: absolute;
   left: 39px;
-  top: 964px;
+  top: auto;
+  bottom: 46px;
   display: flex;
   width: 244px;
   height: 63px;
@@ -425,12 +436,12 @@ button { font: inherit; color: inherit; }
    own card group, whose origin is given above each block.
    ========================================================================== */
 .lifestyle .logo { left: 39px; top: 23px; }
-.lifestyle .navlinks { left: 700px; top: 23px; }
-.lifestyle .btn-white { left: 1494px; top: 23px; }
+.lifestyle .navlinks { left: calc(50% - 142.5px); top: 23px; }
+.lifestyle .btn-white { left: auto; right: 40px; top: 23px; }
 
 .lifestyle__title {
   position: absolute;
-  left: 549px;
+  left: calc(50% - 292.5px);
   top: 195px;
   transform: translateY(1.54px);
   width: 585px;
@@ -509,7 +520,8 @@ button { font: inherit; color: inherit; }
 /* --- card 1: non-custodial security --- group origin (10, 221) ----------- */
 .lcard--security {
   left: 10px;
-  top: 221px;
+  top: auto;
+  bottom: 9px;
   width: 547px;
   height: 843px;
 }
@@ -582,8 +594,9 @@ button { font: inherit; color: inherit; }
 
 /* --- card 2: lightning transfers --- group origin (568, 461) ------------- */
 .lcard--transfers {
-  left: 568px;
-  top: 461px;
+  left: calc(50% - 274.5px);
+  top: auto;
+  bottom: 10px;
   width: 549px;
   height: 602px;
   isolation: isolate;
@@ -650,8 +663,10 @@ button { font: inherit; color: inherit; }
 
 /* --- card 3: automated staking --- group origin (1127, 220) -------------- */
 .lcard--staking {
-  left: 1127px;
-  top: 220px;
+  left: auto;
+  right: 10px;
+  top: auto;
+  bottom: 10px;
   width: 548px;
   height: 843px;
 }
@@ -739,16 +754,29 @@ button { font: inherit; color: inherit; }
 
   .stage {
     width: 100%;
-    transform: none;
+  }
+
+  .panel-slot {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    scroll-snap-align: none;
   }
 
   .panel {
+    position: relative;
+    left: auto;
+    top: auto;
     width: 100%;
     height: auto;
     border-radius: 24px;
     padding: 20px 20px 32px;
     overflow: hidden;
+    transform: none;
   }
+
+  .panel-slot + .panel-slot { margin-top: var(--panel-gap); }
 
   /* --- chrome ---------------------------------------------------------- */
   .topbar {
@@ -785,6 +813,7 @@ button { font: inherit; color: inherit; }
     position: relative;
     left: auto;
     top: auto;
+    bottom: auto;
     width: auto;
     height: auto;
     transform: none;
@@ -804,6 +833,7 @@ button { font: inherit; color: inherit; }
     position: relative;
     order: 3;
     left: auto;
+    right: auto;
     top: auto;
     width: 100%;
     height: auto;
@@ -882,7 +912,9 @@ button { font: inherit; color: inherit; }
 
   .lcard {
     left: 0;
+    right: auto;
     top: 0;
+    bottom: auto;
     transform: translateY(var(--crop-shift, 0px)) scale(var(--card-scale, 1));
     transform-origin: top left;
   }
